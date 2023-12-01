@@ -1,5 +1,6 @@
 #include "stm32f3xx_hal.h"
 #include <stdint.h>
+#include <stdio.h>
 #include "globals.h"
 #include "colour_control.h"
 
