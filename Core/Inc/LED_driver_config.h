@@ -4,7 +4,7 @@
  * @brief Declarations for LED_driver_config.c
  *
  * @author Erwin Bauernschmitt
- * @date 30/11/2023
+ * @date 3/12/2023
  *******************************************************************************
  */
 
@@ -12,13 +12,15 @@
 #ifndef LED_DRIVER_CONFIG_H
 #define LED_DRIVER_CONFIG_H
 
-
+/**
+ * @brief Represents the states of the LED drivers.
+ */
 typedef enum {
-	LED_DRIVER_OK,
-	LED_DRIVER_INIT_FAIL,
-	LED_DRIVER_DOT_FAIL,
-	LED_DRIVER_THERMAL_ERROR,
-	LED_DRIVER_OPEN_ERROR
+	LED_DRIVER_OK,				///< Successful initialisation of LED drivers.
+	LED_DRIVER_INIT_FAIL,		///< Unsuccessful initialisation of LED drivers.
+	LED_DRIVER_DOT_FAIL,		///< Unsuccessful config of dot correction.
+	LED_DRIVER_THERMAL_ERROR,	///< Thermal flag raised by drivers.
+	LED_DRIVER_OPEN_ERROR		///< Open LED detected by drivers.
 } LED_Driver_Status;
 
 

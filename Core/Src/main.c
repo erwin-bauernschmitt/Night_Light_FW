@@ -24,6 +24,7 @@
 #include <stdint.h>
 #include "globals.h"
 #include "LED_driver_config.h"
+#include "state_machine.h"
 #include <stdio.h>
 
 /* USER CODE END Includes */
@@ -35,10 +36,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-uint32_t adc_buffer[MOVING_AVERAGE_SIZE] = {0};
-uint32_t adc_sum = 0;
-uint8_t buffer_index = 0;
-uint32_t moving_average = 0;
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -55,6 +53,20 @@ I2C_HandleTypeDef hi2c2;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim15;
+
+uint32_t adc_buffer[MOVING_AVERAGE_SIZE] = {0};
+uint32_t adc_sum = 0;
+uint8_t buffer_index = 0;
+uint32_t moving_average = 0;
+
+State colour_mode = WHITE_LIGHT;
+State previous_state = WHITE_LIGHT;
+State current_state = STANDBY;
+PotCalibrationSubstate pot_cal_substate = POT_CALIBRATION_START;
+LEDCalibrationSubstate led_cal_substate = LED_CALIBRATION_START;
+LightCalibrationSubstate light_cal_substate = LIGHT_CALIBRATION_START;
+
+State event_flag = NO_EVENT;
 
 /* USER CODE BEGIN PV */
 
@@ -132,9 +144,10 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-//	  uint16_t pulseValue = (uint16_t)(moving_average * 1000 / 4096);
-//	  printf("Pulse: %u\n", pulseValue);
-//	  HAL_Delay(1000);
+	  if (event_flag != NO_EVENT) {
+		  update_state(event_flag);
+		  event_flag = NO_EVENT;  // Reset the flag after handling the event
+	  }
 
     /* USER CODE END WHILE */
 
