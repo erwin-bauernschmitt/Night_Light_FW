@@ -54,20 +54,6 @@ TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim15;
 
-uint32_t adc_buffer[MOVING_AVERAGE_SIZE] = {0};
-uint32_t adc_sum = 0;
-uint8_t buffer_index = 0;
-uint32_t moving_average = 0;
-
-State colour_mode = WHITE_LIGHT;
-State previous_state = WHITE_LIGHT;
-State current_state = STANDBY;
-PotCalibrationSubstate pot_cal_substate = POT_CALIBRATION_START;
-LEDCalibrationSubstate led_cal_substate = LED_CALIBRATION_START;
-LightCalibrationSubstate light_cal_substate = LIGHT_CALIBRATION_START;
-
-State event_flag = NO_EVENT;
-
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -586,12 +572,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(SOUT_R_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : XERR_R_Pin INT_Pin */
-  GPIO_InitStruct.Pin = XERR_R_Pin|INT_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
   /*Configure GPIO pins : SIN_R_Pin MODE_Pin SCLK_Pin XLAT_Pin
                            SIN_G_Pin */
   GPIO_InitStruct.Pin = SIN_R_Pin|MODE_Pin|SCLK_Pin|XLAT_Pin
@@ -613,6 +593,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : INT_Pin */
+  GPIO_InitStruct.Pin = INT_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(INT_GPIO_Port, &GPIO_InitStruct);
+
   /*Configure GPIO pin : SIN_B_Pin */
   GPIO_InitStruct.Pin = SIN_B_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -620,9 +606,9 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(SIN_B_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : SENSITIVITY_BTN_Pin COLOUR_BTN_Pin */
-  GPIO_InitStruct.Pin = SENSITIVITY_BTN_Pin|COLOUR_BTN_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  /*Configure GPIO pins : BRIGHTNESS_BTN_Pin SENSITIVITY_BTN_Pin COLOUR_BTN_Pin */
+  GPIO_InitStruct.Pin = BRIGHTNESS_BTN_Pin|SENSITIVITY_BTN_Pin|COLOUR_BTN_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
