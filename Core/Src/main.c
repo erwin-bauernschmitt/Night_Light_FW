@@ -25,6 +25,7 @@
 #include "globals.h"
 #include "LED_driver_config.h"
 #include "state_machine.h"
+#include "colour_control.h"
 #include <stdio.h>
 
 /* USER CODE END Includes */
