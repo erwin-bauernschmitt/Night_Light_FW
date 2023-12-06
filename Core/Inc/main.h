@@ -67,6 +67,8 @@ void Error_Handler(void);
 #define COLOUR_VAL_GPIO_Port GPIOA
 #define SOUT_R_Pin GPIO_PIN_6
 #define SOUT_R_GPIO_Port GPIOA
+#define XERR_R_Pin GPIO_PIN_7
+#define XERR_R_GPIO_Port GPIOA
 #define BLANK_R_Pin GPIO_PIN_0
 #define BLANK_R_GPIO_Port GPIOB
 #define SIN_R_Pin GPIO_PIN_1

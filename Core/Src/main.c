@@ -566,11 +566,11 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(SIN_B_GPIO_Port, SIN_B_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : SOUT_R_Pin */
-  GPIO_InitStruct.Pin = SOUT_R_Pin;
+  /*Configure GPIO pins : SOUT_R_Pin XERR_R_Pin */
+  GPIO_InitStruct.Pin = SOUT_R_Pin|XERR_R_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(SOUT_R_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pins : SIN_R_Pin MODE_Pin SCLK_Pin XLAT_Pin
                            SIN_G_Pin */
@@ -589,7 +589,7 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pins : XERR_G_Pin XERR_B_Pin */
   GPIO_InitStruct.Pin = XERR_G_Pin|XERR_B_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
