@@ -93,7 +93,21 @@ typedef enum {
 } EventType;
 
 
+typedef enum {
+	RELEASED,
+	PRESSED,
+	INVALID = -1
+} InputFlag;
+
+
 void update_state(EventType event);
+
+void handle_standby(EventType event);
+void handle_white_light(EventType event);
+void handle_RGB_light(EventType event);
+void update_pot_cal_substate(EventType event);
+void update_led_cal_substate(EventType event);
+void update_light_cal_substate(EventType event);
 
 
 #endif /* STATE_MACHINE_H */

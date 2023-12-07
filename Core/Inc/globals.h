@@ -35,7 +35,6 @@ extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim15;
 
-
 extern State colour_mode;
 extern State previous_state;
 extern State current_state;
@@ -43,6 +42,19 @@ extern PotCalibrationSubstate pot_cal_substate;
 extern LEDCalibrationSubstate led_cal_substate;
 extern LightCalibrationSubstate light_cal_substate;
 
-volatile extern State event_flag;
+volatile extern EventType event_flag;
+
+extern GPIO_PinState brightness_btn_state;
+extern GPIO_PinState colour_btn_state;
+extern GPIO_PinState sensitivity_btn_state;
+
+extern InputFlag brightness_btn_flag;
+extern InputFlag colour_btn_flag;
+extern InputFlag sensitivity_btn_flag;
+
+extern uint32_t brightness_btn_time;
+extern uint32_t colour_btn_time;
+extern uint32_t sensitivity_btn_time;
+
 
 #endif /* GLOBALS_H */

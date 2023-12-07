@@ -23,7 +23,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 		// Calculate moving average
 		moving_average = adc_sum / MOVING_AVERAGE_SIZE;
 
-		printf("%u\n", moving_average);
+//		printf("%u\n", moving_average);
 
 		set_pulse_value();
 		// Here you can use 'moving_average' for further processing

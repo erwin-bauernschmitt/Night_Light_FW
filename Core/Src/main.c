@@ -54,7 +54,35 @@ TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim15;
 
+
 /* USER CODE BEGIN PV */
+
+uint32_t adc_buffer[MOVING_AVERAGE_SIZE] = {0};
+uint32_t adc_sum = 0;
+uint8_t buffer_index = 0;
+uint32_t moving_average = 0;
+
+State colour_mode = WHITE_LIGHT;
+State previous_state = WHITE_LIGHT;
+State current_state = STANDBY;
+PotCalibrationSubstate pot_cal_substate = POT_CALIBRATION_START;
+LEDCalibrationSubstate led_cal_substate = LED_CALIBRATION_START;
+LightCalibrationSubstate light_cal_substate = LIGHT_CALIBRATION_START;
+
+volatile EventType event_flag = NO_EVENT;
+
+InputFlag brightness_btn_flag = INVALID;
+InputFlag colour_btn_flag = INVALID;
+InputFlag sensitivity_btn_flag = INVALID;
+
+uint32_t brightness_btn_time;
+uint32_t colour_btn_time;
+uint32_t sensitivity_btn_time;
+
+GPIO_PinState brightness_btn_state;
+GPIO_PinState colour_btn_state;
+GPIO_PinState sensitivity_btn_state;
+
 
 /* USER CODE END PV */
 
@@ -73,6 +101,7 @@ static void MX_TIM2_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
 
 /* USER CODE END 0 */
 
@@ -124,6 +153,26 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim2);
 
 
+  brightness_btn_state = HAL_GPIO_ReadPin(BRIGHTNESS_BTN_GPIO_Port, BRIGHTNESS_BTN_Pin);
+  colour_btn_state = HAL_GPIO_ReadPin(BRIGHTNESS_BTN_GPIO_Port, BRIGHTNESS_BTN_Pin);
+  sensitivity_btn_state = HAL_GPIO_ReadPin(BRIGHTNESS_BTN_GPIO_Port, BRIGHTNESS_BTN_Pin);
+
+  if (brightness_btn_state == GPIO_PIN_RESET) {
+	  brightness_btn_flag = RELEASED;
+  }
+  if (colour_btn_state == GPIO_PIN_RESET) {
+	  colour_btn_flag = RELEASED;
+  }
+  if (sensitivity_btn_state == GPIO_PIN_RESET) {
+	  sensitivity_btn_flag = RELEASED;
+  }
+
+  brightness_btn_time = HAL_GetTick();
+  colour_btn_time = HAL_GetTick();
+  sensitivity_btn_time = HAL_GetTick();
+
+  printf("buttons configured\n");
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -134,6 +183,11 @@ int main(void)
 		  update_state(event_flag);
 		  event_flag = NO_EVENT;  // Reset the flag after handling the event
 	  }
+
+//	  /* To test HAL_GetTick: */
+//	  uint32_t time = HAL_GetTick();
+//	  printf("%lu\n", time);
+//	  HAL_Delay(1000);
 
     /* USER CODE END WHILE */
 
