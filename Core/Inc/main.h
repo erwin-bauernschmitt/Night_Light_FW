@@ -69,7 +69,6 @@ void Error_Handler(void);
 #define SOUT_R_GPIO_Port GPIOA
 #define XERR_R_Pin GPIO_PIN_7
 #define XERR_R_GPIO_Port GPIOA
-#define XERR_R_EXTI_IRQn EXTI9_5_IRQn
 #define BLANK_R_Pin GPIO_PIN_0
 #define BLANK_R_GPIO_Port GPIOB
 #define SIN_R_Pin GPIO_PIN_1
@@ -111,6 +110,9 @@ void Error_Handler(void);
 #define XERR_B_EXTI_IRQn EXTI9_5_IRQn
 #define SOUT_B_Pin GPIO_PIN_6
 #define SOUT_B_GPIO_Port GPIOB
+#define BRIGHTNESS_BTN_Pin GPIO_PIN_7
+#define BRIGHTNESS_BTN_GPIO_Port GPIOB
+#define BRIGHTNESS_BTN_EXTI_IRQn EXTI9_5_IRQn
 #define SENSITIVITY_BTN_Pin GPIO_PIN_8
 #define SENSITIVITY_BTN_GPIO_Port GPIOB
 #define SENSITIVITY_BTN_EXTI_IRQn EXTI9_5_IRQn

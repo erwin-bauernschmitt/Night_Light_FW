@@ -54,6 +54,9 @@ TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim15;
 
+
+/* USER CODE BEGIN PV */
+
 uint32_t adc_buffer[MOVING_AVERAGE_SIZE] = {0};
 uint32_t adc_sum = 0;
 uint8_t buffer_index = 0;
@@ -66,9 +69,20 @@ PotCalibrationSubstate pot_cal_substate = POT_CALIBRATION_START;
 LEDCalibrationSubstate led_cal_substate = LED_CALIBRATION_START;
 LightCalibrationSubstate light_cal_substate = LIGHT_CALIBRATION_START;
 
-State event_flag = NO_EVENT;
+volatile EventType event_flag = NO_EVENT;
 
-/* USER CODE BEGIN PV */
+InputFlag brightness_btn_flag = INVALID;
+InputFlag colour_btn_flag = INVALID;
+InputFlag sensitivity_btn_flag = INVALID;
+
+uint32_t brightness_btn_time;
+uint32_t colour_btn_time;
+uint32_t sensitivity_btn_time;
+
+GPIO_PinState brightness_btn_state;
+GPIO_PinState colour_btn_state;
+GPIO_PinState sensitivity_btn_state;
+
 
 /* USER CODE END PV */
 
@@ -87,6 +101,7 @@ static void MX_TIM2_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
 
 /* USER CODE END 0 */
 
@@ -138,6 +153,26 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim2);
 
 
+  brightness_btn_state = HAL_GPIO_ReadPin(BRIGHTNESS_BTN_GPIO_Port, BRIGHTNESS_BTN_Pin);
+  colour_btn_state = HAL_GPIO_ReadPin(BRIGHTNESS_BTN_GPIO_Port, BRIGHTNESS_BTN_Pin);
+  sensitivity_btn_state = HAL_GPIO_ReadPin(BRIGHTNESS_BTN_GPIO_Port, BRIGHTNESS_BTN_Pin);
+
+  if (brightness_btn_state == GPIO_PIN_RESET) {
+	  brightness_btn_flag = RELEASED;
+  }
+  if (colour_btn_state == GPIO_PIN_RESET) {
+	  colour_btn_flag = RELEASED;
+  }
+  if (sensitivity_btn_state == GPIO_PIN_RESET) {
+	  sensitivity_btn_flag = RELEASED;
+  }
+
+  brightness_btn_time = HAL_GetTick();
+  colour_btn_time = HAL_GetTick();
+  sensitivity_btn_time = HAL_GetTick();
+
+  printf("buttons configured\n");
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -148,6 +183,11 @@ int main(void)
 		  update_state(event_flag);
 		  event_flag = NO_EVENT;  // Reset the flag after handling the event
 	  }
+
+//	  /* To test HAL_GetTick: */
+//	  uint32_t time = HAL_GetTick();
+//	  printf("%lu\n", time);
+//	  HAL_Delay(1000);
 
     /* USER CODE END WHILE */
 
@@ -580,16 +620,10 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(SIN_B_GPIO_Port, SIN_B_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : SOUT_R_Pin */
-  GPIO_InitStruct.Pin = SOUT_R_Pin;
+  /*Configure GPIO pins : SOUT_R_Pin XERR_R_Pin */
+  GPIO_InitStruct.Pin = SOUT_R_Pin|XERR_R_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(SOUT_R_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : XERR_R_Pin INT_Pin */
-  GPIO_InitStruct.Pin = XERR_R_Pin|INT_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pins : SIN_R_Pin MODE_Pin SCLK_Pin XLAT_Pin
@@ -609,9 +643,15 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pins : XERR_G_Pin XERR_B_Pin */
   GPIO_InitStruct.Pin = XERR_G_Pin|XERR_B_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : INT_Pin */
+  GPIO_InitStruct.Pin = INT_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(INT_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : SIN_B_Pin */
   GPIO_InitStruct.Pin = SIN_B_Pin;
@@ -620,9 +660,9 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(SIN_B_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : SENSITIVITY_BTN_Pin COLOUR_BTN_Pin */
-  GPIO_InitStruct.Pin = SENSITIVITY_BTN_Pin|COLOUR_BTN_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  /*Configure GPIO pins : BRIGHTNESS_BTN_Pin SENSITIVITY_BTN_Pin COLOUR_BTN_Pin */
+  GPIO_InitStruct.Pin = BRIGHTNESS_BTN_Pin|SENSITIVITY_BTN_Pin|COLOUR_BTN_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 

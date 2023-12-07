@@ -78,6 +78,10 @@ void handle_standby(EventType event) {
 			previous_state = STANDBY;
 			current_state = AMBIENT_LIGHT_CALIBRATION;
 			break;
+
+		default:
+			// Intentionally ignoring other cases as invalid inputs for process.
+			break;
 	}
 }
 
@@ -116,6 +120,10 @@ void handle_white_light(EventType event) {
 			previous_state = WHITE_LIGHT;
 			current_state = STANDBY;
 			break;
+
+		default:
+			// Intentionally ignoring other cases as invalid inputs for process.
+			break;
 	}
 }
 
@@ -153,6 +161,10 @@ void handle_RGB_light(EventType event) {
 		case AMBIENT_LIGHT_TURN_OFF:
 			previous_state = RGB_LIGHT;
 			current_state = STANDBY;
+			break;
+
+		default:
+			// Intentionally ignoring other cases as invalid inputs for process.
 			break;
 	}
 }
