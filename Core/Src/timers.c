@@ -6,6 +6,7 @@
 
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+	uint16_t pulse_value;
     if (htim->Instance == TIM2) { // Replace TIMx_INSTANCE with your timer instance
         // Assuming ADC is already running in continuous mode
 
@@ -24,8 +25,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 		moving_average = adc_sum / MOVING_AVERAGE_SIZE;
 
 //		printf("%u\n", moving_average);
-
-		set_pulse_value();
+		pulse_value = (uint16_t)(moving_average * 1000 / 4096);
+		set_pulse_values(pulse_value, pulse_value, pulse_value);
 		// Here you can use 'moving_average' for further processing
 	}
 }

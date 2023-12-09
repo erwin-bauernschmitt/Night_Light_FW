@@ -27,34 +27,40 @@ void set_pulse_values(uint16_t r_pulse, uint16_t g_pulse, uint16_t b_pulse) {
 
 
 void single_pulse(void) {
+	HAL_NVIC_DisableIRQ(TIM2_IRQn);
+	set_pulse_values(COUNTER_PERIOD, COUNTER_PERIOD, COUNTER_PERIOD);
+	HAL_Delay(150);
 	set_pulse_values(0, 0, 0);
 	HAL_Delay(150);
-	set_pulse_values(CCOUNTER_PERIOD, COUNTER_PERIOD, COUNTER_PERIOD);
+	set_pulse_values(COUNTER_PERIOD, COUNTER_PERIOD, COUNTER_PERIOD);
 	HAL_Delay(150);
-	set_pulse_values(0, 0, 0);
-	HAL_Delay(150);
+	HAL_NVIC_EnableIRQ(TIM2_IRQn);
 }
 
 
 void double_pulse(void) {
-	set_pulse_values(0, 0, 0);
-	HAL_Delay(150);
-	set_pulse_values(CCOUNTER_PERIOD, COUNTER_PERIOD, COUNTER_PERIOD);
-	HAL_Delay(150);
-	set_pulse_values(0, 0, 0);
-	HAL_Delay(150);
-	set_pulse_values(CCOUNTER_PERIOD, COUNTER_PERIOD, COUNTER_PERIOD);
+	HAL_NVIC_DisableIRQ(TIM2_IRQn);
+	set_pulse_values(COUNTER_PERIOD, COUNTER_PERIOD, COUNTER_PERIOD);
 	HAL_Delay(150);
 	set_pulse_values(0, 0, 0);
 	HAL_Delay(150);
+	set_pulse_values(COUNTER_PERIOD, COUNTER_PERIOD, COUNTER_PERIOD);
+	HAL_Delay(150);
+	set_pulse_values(0, 0, 0);
+	HAL_Delay(150);
+	set_pulse_values(COUNTER_PERIOD, COUNTER_PERIOD, COUNTER_PERIOD);
+	HAL_Delay(150);
+	HAL_NVIC_EnableIRQ(TIM2_IRQn);
 }
 
 
 void long_pulse(void) {
-	set_pulse_values(0, 0, 0);
+	HAL_NVIC_DisableIRQ(TIM2_IRQn);
+	set_pulse_values(COUNTER_PERIOD, COUNTER_PERIOD, COUNTER_PERIOD);
 	HAL_Delay(150);
-	set_pulse_values(CCOUNTER_PERIOD, COUNTER_PERIOD, COUNTER_PERIOD);
+	set_pulse_values(0, 0, 0);
 	HAL_Delay(1000);
-	set_pulse_values(0, 0, 0);
+	set_pulse_values(COUNTER_PERIOD, COUNTER_PERIOD, COUNTER_PERIOD);
 	HAL_Delay(150);
+	HAL_NVIC_EnableIRQ(TIM2_IRQn);
 }

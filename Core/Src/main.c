@@ -174,6 +174,8 @@ int main(void)
 
   printf("buttons configured\n");
 
+  event_flag = AMBIENT_LIGHT_TURN_ON;		///< Force out of STANDBY state.
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
