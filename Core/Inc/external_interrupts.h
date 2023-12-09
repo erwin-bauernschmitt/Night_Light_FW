@@ -11,6 +11,18 @@
 
 #include <stdint.h>
 #include "hardware_defines.h"
+#include "state_machine.h"
+
+
+typedef struct {
+    uint32_t *last_time;
+    ButtonState *state;
+    EventType short_press_event;
+    EventType long_press_event;
+    ButtonState *other_button1_state;
+    ButtonState *other_button2_state;
+} ButtonInfo;
 
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin);
+void handle_button(ButtonInfo *button, uint32_t current_time);

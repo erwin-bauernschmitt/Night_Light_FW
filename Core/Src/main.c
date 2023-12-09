@@ -72,17 +72,17 @@ LightCalibrationSubstate light_cal_substate = LIGHT_CALIBRATION_START;
 
 volatile EventType event_flag = NO_EVENT;
 
-InputFlag brightness_btn_flag = INVALID;
-InputFlag colour_btn_flag = INVALID;
-InputFlag sensitivity_btn_flag = INVALID;
+ButtonState brightness_btn_state = INVALID;
+ButtonState colour_btn_state = INVALID;
+ButtonState sensitivity_btn_state = INVALID;
 
 uint32_t brightness_btn_time;
 uint32_t colour_btn_time;
 uint32_t sensitivity_btn_time;
 
-GPIO_PinState brightness_btn_state;
-GPIO_PinState colour_btn_state;
-GPIO_PinState sensitivity_btn_state;
+GPIO_PinState brightness_btn_s;
+GPIO_PinState colour_btn_s;
+GPIO_PinState sensitivity_btn_s;
 
 
 /* USER CODE END PV */
@@ -154,18 +154,18 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim2);
 
 
-  brightness_btn_state = HAL_GPIO_ReadPin(BRIGHTNESS_BTN_GPIO_Port, BRIGHTNESS_BTN_Pin);
-  colour_btn_state = HAL_GPIO_ReadPin(BRIGHTNESS_BTN_GPIO_Port, BRIGHTNESS_BTN_Pin);
-  sensitivity_btn_state = HAL_GPIO_ReadPin(BRIGHTNESS_BTN_GPIO_Port, BRIGHTNESS_BTN_Pin);
+  brightness_btn_s = HAL_GPIO_ReadPin(BRIGHTNESS_BTN_GPIO_Port, BRIGHTNESS_BTN_Pin);
+  colour_btn_s = HAL_GPIO_ReadPin(BRIGHTNESS_BTN_GPIO_Port, BRIGHTNESS_BTN_Pin);
+  sensitivity_btn_s = HAL_GPIO_ReadPin(BRIGHTNESS_BTN_GPIO_Port, BRIGHTNESS_BTN_Pin);
 
-  if (brightness_btn_state == GPIO_PIN_RESET) {
-	  brightness_btn_flag = RELEASED;
+  if (brightness_btn_s == GPIO_PIN_RESET) {
+	  brightness_btn_state = RELEASED;
   }
-  if (colour_btn_state == GPIO_PIN_RESET) {
-	  colour_btn_flag = RELEASED;
+  if (colour_btn_s == GPIO_PIN_RESET) {
+	  colour_btn_state = RELEASED;
   }
-  if (sensitivity_btn_state == GPIO_PIN_RESET) {
-	  sensitivity_btn_flag = RELEASED;
+  if (sensitivity_btn_s == GPIO_PIN_RESET) {
+	  sensitivity_btn_state = RELEASED;
   }
 
   brightness_btn_time = HAL_GetTick();
