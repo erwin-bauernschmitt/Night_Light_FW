@@ -37,7 +37,6 @@ typedef enum {
 	POT_2_UPPER,				///< Capture ADC value of Pot 2 upper limit.
 	POT_3_LOWER,				///< Capture ADC value of Pot 3 lower limit.
 	POT_3_UPPER,				///< Capture ADC value of Pot 3 upper limit.
-	POT_CALIBRATION_END			///< End of potentiometer calibration process.
 } PotCalibrationSubstate;
 
 
@@ -62,7 +61,6 @@ typedef enum {
 	LED_14,						///< Tune LED 14 colour channels and save.
 	LED_15,						///< Tune LED 15 colour channels and save.
 	LED_16,						///< Tune LED 16 colour channels and save.
-	LED_CALIBRATION_END			///< End of LED calibration process.
 } LEDCalibrationSubstate;
 
 
@@ -73,7 +71,6 @@ typedef enum {
 	LIGHT_CALIBRATION_START,	///< Start of ambient light calibration process.
 	LIT_ROOM,					///< Capture ambient effect of LEDs (lit room).
 	DARK_ROOM,					///< Capture ambient effect of LEDs (dark room).
-	LIGHT_CALIBRATION_END		///< End of ambient light calibration process.
 } LightCalibrationSubstate;
 
 

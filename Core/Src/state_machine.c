@@ -11,6 +11,7 @@
 
 #include "state_machine.h"
 #include "globals.h"
+#include "colour_control.h"
 
 
 /**
@@ -67,16 +68,19 @@ void handle_standby(EventType event) {
 		case POT_1_BUTTON_HOLD:
 			previous_state = STANDBY;
 			current_state = POT_CALIBRATION;
+			update_pot_cal_substate(event);
 			break;
 
 		case POT_2_BUTTON_HOLD:
 			previous_state = STANDBY;
 			current_state = LED_CALIBRATION;
+			update_led_cal_substate(event);
 			break;
 
 		case POT_3_BUTTON_HOLD:
 			previous_state = STANDBY;
 			current_state = AMBIENT_LIGHT_CALIBRATION;
+			update_light_cal_substate(event);
 			break;
 
 		default:
@@ -104,16 +108,19 @@ void handle_white_light(EventType event) {
 		case POT_1_BUTTON_HOLD:
 			previous_state = WHITE_LIGHT;
 			current_state = POT_CALIBRATION;
+			update_pot_cal_substate(event);
 			break;
 
 		case POT_2_BUTTON_HOLD:
 			previous_state = WHITE_LIGHT;
 			current_state = LED_CALIBRATION;
+			update_led_cal_substate(event);
 			break;
 
 		case POT_3_BUTTON_HOLD:
 			previous_state = WHITE_LIGHT;
 			current_state = AMBIENT_LIGHT_CALIBRATION;
+			update_light_cal_substate(event);
 			break;
 
 		case AMBIENT_LIGHT_TURN_OFF:
@@ -146,16 +153,19 @@ void handle_RGB_light(EventType event) {
 		case POT_1_BUTTON_HOLD:
 			previous_state = RGB_LIGHT;
 			current_state = POT_CALIBRATION;
+			update_pot_cal_substate(event);
 			break;
 
 		case POT_2_BUTTON_HOLD:
 			previous_state = RGB_LIGHT;
 			current_state = LED_CALIBRATION;
+			update_led_cal_substate(event);
 			break;
 
 		case POT_3_BUTTON_HOLD:
 			previous_state = RGB_LIGHT;
 			current_state = AMBIENT_LIGHT_CALIBRATION;
+			update_light_cal_substate(event);
 			break;
 
 		case AMBIENT_LIGHT_TURN_OFF:
@@ -181,6 +191,8 @@ void update_pot_cal_substate(EventType event) {
 	switch (pot_cal_substate) {
 		case POT_CALIBRATION_START:
 			/* Flash white LEDs twice to indicate start of calibration. */
+			double_pulse();
+
 			/* Set all 16 LEDs to shine red for the first pot. */
 			/* Brightness pot works with unscaled values. */
 			pot_cal_substate = POT_1_LOWER;
@@ -190,6 +202,7 @@ void update_pot_cal_substate(EventType event) {
 			if (event == POT_1_BUTTON_PRESS) {
 				/* Save lower value in buffer */
 				/* Flash white LEDs once to indicate capture. */
+				single_pulse();
 				pot_cal_substate = POT_1_UPPER;
 			}
 			break;
@@ -199,6 +212,7 @@ void update_pot_cal_substate(EventType event) {
 				/* Compare to lower value, save in buffer if greater. */
 				/* If less or equal, save 0 for lower and 4095 for upper. */
 				/* Flash White LEDs once to indicate capture. */
+				single_pulse();
 				/* Set all 16 LEDs to shine green for the second pot. */
 				pot_cal_substate = POT_2_LOWER;
 			}
@@ -208,6 +222,7 @@ void update_pot_cal_substate(EventType event) {
 			if (event == POT_1_BUTTON_PRESS) {
 				/* Save lower value in buffer */
 				/* Flash white LEDs once to indicate capture. */
+				single_pulse();
 				pot_cal_substate = POT_2_UPPER;
 			}
 			break;
@@ -217,6 +232,7 @@ void update_pot_cal_substate(EventType event) {
 				/* Compare to lower value, save in buffer if greater. */
 				/* If less or equal, save 0 for lower and 4095 for upper. */
 				/* Flash White LEDs once to indicate capture. */
+				single_pulse();
 				/* Set all 16 LEDs to shine blue for the third pot. */
 				pot_cal_substate = POT_3_LOWER;
 			}
@@ -226,6 +242,7 @@ void update_pot_cal_substate(EventType event) {
 			if (event == POT_1_BUTTON_PRESS) {
 				/* Save lower value in buffer */
 				/* Flash white LEDs once to indicate capture. */
+				single_pulse();
 				pot_cal_substate = POT_3_UPPER;
 			}
 			break;
@@ -235,18 +252,18 @@ void update_pot_cal_substate(EventType event) {
 				/* Compare to lower value, save in buffer if greater. */
 				/* If less or equal, save 0 for lower and 4095 for upper. */
 				/* Flash White LEDs once to indicate capture. */
+				single_pulse();
+				HAL_Delay(1000);
 				/* Set all 16 LEDs to shine blue for the third pot. */
-				pot_cal_substate = POT_CALIBRATION_END;
+				/* Save the completed calibration buffer to flash memory. */
+				/* Scale potentiometer readings with tbe new calibration values */
+				/* Delay, then flash white LED colours for 1s. */
+				long_pulse();
+				/* Flash white LEDs twice to indicate end of calibration. */
+				double_pulse();
+				pot_cal_substate = POT_CALIBRATION_START;
+				current_state = previous_state;
 			}
-			break;
-
-		case POT_CALIBRATION_END:
-			/* Save the completed calibration buffer to flash memory. */
-			/* Scale potentiometer readings with tbe new calibration values */
-			/* Delay for 1s, then flash white LED colours for 2s. */
-			/* Flash white LEDs twice to indicate end of calibration. */
-			pot_cal_substate = POT_CALIBRATION_START;
-			current_state = previous_state;
 			break;
 	}
 }
@@ -263,6 +280,7 @@ void update_led_cal_substate(EventType event) {
 	switch (led_cal_substate) {
 		case LED_CALIBRATION_START:
 			/* Flash white LEDs twice to indicate start of calibration. */
+			double_pulse();
 			/* Each potentiometer now changes an RGB colour channel.  */
 			/* Turn off all LEDs except for LED 1. */
 			led_cal_substate = LED_1;
@@ -272,6 +290,8 @@ void update_led_cal_substate(EventType event) {
 			if (event == POT_2_BUTTON_PRESS) {
 				/* Save calibration values in buffer. */
 				/* Turn off LED 1, turn on LED 2. */
+				/* Flash White LEDs once to indicate capture. */
+				single_pulse();
 				led_cal_substate = LED_2;
 			}
 			break;
@@ -280,6 +300,8 @@ void update_led_cal_substate(EventType event) {
 			if (event == POT_2_BUTTON_PRESS) {
 				/* Save calibration values in buffer. */
 				/* Turn off LED 2, turn on LED 3. */
+				/* Flash White LEDs once to indicate capture. */
+				single_pulse();
 				led_cal_substate = LED_3;
 			}
 			break;
@@ -288,6 +310,8 @@ void update_led_cal_substate(EventType event) {
 			if (event == POT_2_BUTTON_PRESS) {
 				/* Save calibration values in buffer. */
 				/* Turn off LED 3, turn on LED 4. */
+				/* Flash White LEDs once to indicate capture. */
+				single_pulse();
 				led_cal_substate = LED_4;
 			}
 			break;
@@ -296,6 +320,8 @@ void update_led_cal_substate(EventType event) {
 			if (event == POT_2_BUTTON_PRESS) {
 				/* Save calibration values in buffer. */
 				/* Turn off LED 4, turn on LED 5. */
+				/* Flash White LEDs once to indicate capture. */
+				single_pulse();
 				led_cal_substate = LED_5;
 			}
 			break;
@@ -304,6 +330,8 @@ void update_led_cal_substate(EventType event) {
 			if (event == POT_2_BUTTON_PRESS) {
 				/* Save calibration values in buffer. */
 				/* Turn off LED 5, turn on LED 6. */
+				/* Flash White LEDs once to indicate capture. */
+				single_pulse();
 				led_cal_substate = LED_6;
 			}
 			break;
@@ -312,6 +340,8 @@ void update_led_cal_substate(EventType event) {
 			if (event == POT_2_BUTTON_PRESS) {
 				/* Save calibration values in buffer. */
 				/* Turn off LED 6, turn on LED 7. */
+				/* Flash White LEDs once to indicate capture. */
+				single_pulse();
 				led_cal_substate = LED_7;
 			}
 			break;
@@ -320,6 +350,8 @@ void update_led_cal_substate(EventType event) {
 			if (event == POT_2_BUTTON_PRESS) {
 				/* Save calibration values in buffer. */
 				/* Turn off LED 7, turn on LED 8. */
+				/* Flash White LEDs once to indicate capture. */
+				single_pulse();
 				led_cal_substate = LED_8;
 			}
 			break;
@@ -328,6 +360,8 @@ void update_led_cal_substate(EventType event) {
 			if (event == POT_2_BUTTON_PRESS) {
 				/* Save calibration values in buffer. */
 				/* Turn off LED 8, turn on LED 9. */
+				/* Flash White LEDs once to indicate capture. */
+				single_pulse();
 				led_cal_substate = LED_9;
 			}
 			break;
@@ -336,6 +370,8 @@ void update_led_cal_substate(EventType event) {
 			if (event == POT_2_BUTTON_PRESS) {
 				/* Save calibration values in buffer. */
 				/* Turn off LED 9, turn on LED 10. */
+				/* Flash White LEDs once to indicate capture. */
+				single_pulse();
 				led_cal_substate = LED_10;
 			}
 			break;
@@ -344,6 +380,8 @@ void update_led_cal_substate(EventType event) {
 			if (event == POT_2_BUTTON_PRESS) {
 				/* Save calibration values in buffer. */
 				/* Turn off LED 10, turn on LED 11. */
+				/* Flash White LEDs once to indicate capture. */
+				single_pulse();
 				led_cal_substate = LED_11;
 			}
 			break;
@@ -352,6 +390,8 @@ void update_led_cal_substate(EventType event) {
 			if (event == POT_2_BUTTON_PRESS) {
 				/* Save calibration values in buffer. */
 				/* Turn off LED 11, turn on LED 12. */
+				/* Flash White LEDs once to indicate capture. */
+				single_pulse();
 				led_cal_substate = LED_12;
 			}
 			break;
@@ -360,6 +400,8 @@ void update_led_cal_substate(EventType event) {
 			if (event == POT_2_BUTTON_PRESS) {
 				/* Save calibration values in buffer. */
 				/* Turn off LED 12, turn on LED 13. */
+				/* Flash White LEDs once to indicate capture. */
+				single_pulse();
 				led_cal_substate = LED_13;
 			}
 			break;
@@ -368,6 +410,8 @@ void update_led_cal_substate(EventType event) {
 			if (event == POT_2_BUTTON_PRESS) {
 				/* Save calibration values in buffer. */
 				/* Turn off LED 13, turn on LED 14. */
+				/* Flash White LEDs once to indicate capture. */
+				single_pulse();
 				led_cal_substate = LED_14;
 			}
 			break;
@@ -376,6 +420,8 @@ void update_led_cal_substate(EventType event) {
 			if (event == POT_2_BUTTON_PRESS) {
 				/* Save calibration values in buffer. */
 				/* Turn off LED 14, turn on LED 15. */
+				/* Flash White LEDs once to indicate capture. */
+				single_pulse();
 				led_cal_substate = LED_15;
 			}
 			break;
@@ -384,6 +430,8 @@ void update_led_cal_substate(EventType event) {
 			if (event == POT_2_BUTTON_PRESS) {
 				/* Save calibration values in buffer. */
 				/* Turn off LED 15, turn on LED 16. */
+				/* Flash White LEDs once to indicate capture. */
+				single_pulse();
 				led_cal_substate = LED_16;
 			}
 			break;
@@ -392,17 +440,19 @@ void update_led_cal_substate(EventType event) {
 			if (event == POT_2_BUTTON_PRESS) {
 				/* Save calibration values in buffer. */
 				/* Turn off LED 16 */
-				led_cal_substate = LED_CALIBRATION_END;
+				/* Flash White LEDs once to indicate capture. */
+				single_pulse();
+				HAL_Delay(1000);
+				/* Save the completed calibration buffer to flash memory. */
+				/* Configure LED drivers with new dot correction values. */
+				/* Delay, then display white LED colours for 1s. */
+				long_pulse();
+				/* Flash white LEDs twice to indicate end of calibration. */
+				double_pulse();
+				led_cal_substate = LED_CALIBRATION_START;
+				current_state = previous_state;
+				break;
 			}
-			break;
-
-		case LED_CALIBRATION_END:
-			/* Save the completed calibration buffer to flash memory. */
-			/* Configure LED drivers with new dot correction values. */
-			/* Delay for 1s, then display corrected white LED colours for 2s. */
-			/* Flash white LEDs twice to indicate end of calibration. */
-			led_cal_substate = LED_CALIBRATION_START;
-			current_state = previous_state;
 			break;
 	}
 }
@@ -419,6 +469,7 @@ void update_light_cal_substate(EventType event) {
 	switch (light_cal_substate) {
 		case LIGHT_CALIBRATION_START:
 			/* Flash white LEDs twice to indicate start of calibration. */
+			double_pulse();
 			light_cal_substate = LIT_ROOM;
 			break;
 
@@ -428,6 +479,7 @@ void update_light_cal_substate(EventType event) {
 				/* Measure contribution of LEDs from 0-100% brightness */
 				/* Save measurements to buffer */
 				/* Flash white LEDs once to indicate capture. */
+				single_pulse();
 				light_cal_substate = DARK_ROOM;
 			}
 			break;
@@ -438,17 +490,18 @@ void update_light_cal_substate(EventType event) {
 				/* Measure contribution of LEDs from 0-100% brightness */
 				/* Save measurements to buffer */
 				/* Flash white LEDs once to indicate capture. */
-				light_cal_substate = LIGHT_CALIBRATION_END;
+				single_pulse();
+				HAL_Delay(1000);
+				/* Save the calibration data to flash memory. */
+				/* Configure hysteresis thresholds. */
+				/* Delay, then display white LED colours for 1s. */
+				long_pulse();
+				/* Flash white LEDs twice to indicate end of calibration. */
+				double_pulse();
+				light_cal_substate = LIGHT_CALIBRATION_START;
+				current_state = previous_state;
+				break;
 			}
-			break;
-
-		case LIGHT_CALIBRATION_END:
-			/* Save the calibration data to flash memory. */
-			/* Configure hysteresis thresholds. */
-			/* Delay for 1s, then display white LED colours for 2s. */
-			/* Flash white LEDs twice to indicate end of calibration. */
-			light_cal_substate = LIGHT_CALIBRATION_START;
-			current_state = previous_state;
 			break;
 	}
 }

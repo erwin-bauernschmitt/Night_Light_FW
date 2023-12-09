@@ -25,6 +25,7 @@
 #include "globals.h"
 #include "LED_driver_config.h"
 #include "state_machine.h"
+#include "colour_control.h"
 #include <stdio.h>
 
 /* USER CODE END Includes */
@@ -172,6 +173,8 @@ int main(void)
   sensitivity_btn_time = HAL_GetTick();
 
   printf("buttons configured\n");
+
+  event_flag = AMBIENT_LIGHT_TURN_ON;		///< Force out of STANDBY state.
 
   /* USER CODE END 2 */
 
