@@ -103,5 +103,29 @@ void handle_button(ButtonInfo *button, uint32_t current_time) {
 }
 
 
+void initialise_button_states(void) {
+	brightness_btn_time = HAL_GetTick();
+	colour_btn_time = HAL_GetTick();
+	sensitivity_btn_time = HAL_GetTick();
+
+	if (HAL_GPIO_ReadPin(BRIGHTNESS_BTN_GPIO_Port, BRIGHTNESS_BTN_Pin) == GPIO_PIN_RESET) {
+		brightness_btn_state = RELEASED;
+	}
+	else {
+		brightness_btn_state = INVALID;
+	}
+	if (HAL_GPIO_ReadPin(COLOUR_BTN_GPIO_Port, COLOUR_BTN_Pin) == GPIO_PIN_RESET) {
+		colour_btn_state = RELEASED;
+	}
+	else {
+		colour_btn_state = INVALID;
+	}
+	if (HAL_GPIO_ReadPin(SENSITIVITY_BTN_GPIO_Port, SENSITIVITY_BTN_Pin) == GPIO_PIN_RESET) {
+		sensitivity_btn_state = RELEASED;
+	}
+	else {
+		sensitivity_btn_state = INVALID;
+	}
+}
 
 

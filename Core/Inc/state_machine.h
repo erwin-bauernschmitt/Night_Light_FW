@@ -93,6 +93,7 @@ typedef enum {
 typedef enum {
 	RELEASED,
 	PRESSED,
+	NONE,
 	INVALID = -1
 } ButtonState;
 

@@ -26,3 +26,4 @@ typedef struct {
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin);
 void handle_button(ButtonInfo *button, uint32_t current_time);
+void initialise_button_states(void);
