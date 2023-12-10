@@ -93,8 +93,9 @@ typedef enum {
 typedef enum {
 	RELEASED,
 	PRESSED,
+	NONE,
 	INVALID = -1
-} InputFlag;
+} ButtonState;
 
 
 void update_state(EventType event);

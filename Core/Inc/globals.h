@@ -44,13 +44,9 @@ extern LightCalibrationSubstate light_cal_substate;
 
 volatile extern EventType event_flag;
 
-extern GPIO_PinState brightness_btn_state;
-extern GPIO_PinState colour_btn_state;
-extern GPIO_PinState sensitivity_btn_state;
-
-extern InputFlag brightness_btn_flag;
-extern InputFlag colour_btn_flag;
-extern InputFlag sensitivity_btn_flag;
+extern ButtonState brightness_btn_state;
+extern ButtonState colour_btn_state;
+extern ButtonState sensitivity_btn_state;
 
 extern uint32_t brightness_btn_time;
 extern uint32_t colour_btn_time;
