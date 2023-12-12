@@ -1,32 +1,62 @@
+/**
+ *******************************************************************************
+ * @file timers.c
+ * @brief Function for reading the pots and updating their moving averages.
+ *
+ * @author Erwin Bauernschmitt
+ * @date 12/12/2023
+ *******************************************************************************
+ */
+
+
 #include "stm32f3xx_hal.h"
 #include <stdint.h>
 #include <stdio.h>
 #include "globals.h"
 #include "colour_control.h"
+#include "timers.h"
 
 
+/**
+ * @brief Reads the potentiometers and updates their moving averages.
+ *
+ * @param htim: pointer to the timer instance (TIM2)
+ *
+ * @return None.
+ */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
-	uint16_t pulse_value;
-    if (htim->Instance == TIM2) { // Replace TIMx_INSTANCE with your timer instance
-        // Assuming ADC is already running in continuous mode
+    if (htim->Instance == TIM2) {
+    	/* Set flag to indicate reading is in progress. */
+    	potentiometer_flag = READING_IN_PROGRESS;
 
-        // Check if conversion is complete // Wait for a short duration for conversion to be completed
-		uint32_t adc_value = HAL_ADC_GetValue(&hadc1);
+        /* Read potentiometer ADC values. */
+		uint16_t pot1_adc_value = (uint16_t)HAL_ADC_GetValue(&hadc1);
+		uint16_t pot2_adc_value = adc2_dma_buffer[0];
+		uint16_t pot3_adc_value = adc2_dma_buffer[1];
+//		printf("%u %u %u\n", pot1_adc_value, pot2_adc_value, pot3_adc_value);
 
-		// Update moving average buffer
-		adc_sum -= adc_buffer[buffer_index];
-		adc_buffer[buffer_index] = adc_value;
-		adc_sum += adc_value;
+		/* Update moving average buffers.*/
+		pot1_buffer_sum -= pot1_moving_average_buffer[buffer_index];
+		pot2_buffer_sum -= pot2_moving_average_buffer[buffer_index];
+		pot3_buffer_sum -= pot3_moving_average_buffer[buffer_index];
 
-		// Update buffer index
+		pot1_moving_average_buffer[buffer_index] = pot1_adc_value;
+		pot2_moving_average_buffer[buffer_index] = pot2_adc_value;
+		pot3_moving_average_buffer[buffer_index] = pot3_adc_value;
+
+		pot1_buffer_sum += pot1_adc_value;
+		pot2_buffer_sum += pot2_adc_value;
+		pot3_buffer_sum += pot3_adc_value;
+
+		/* Update buffer index. */
 		buffer_index = (buffer_index + 1) % MOVING_AVERAGE_SIZE;
 
-		// Calculate moving average
-		moving_average = adc_sum / MOVING_AVERAGE_SIZE;
+		/* Calculate moving averages. */
+		pot1_moving_average = pot1_buffer_sum / MOVING_AVERAGE_SIZE;
+		pot2_moving_average = pot2_buffer_sum / MOVING_AVERAGE_SIZE;
+		pot3_moving_average = pot3_buffer_sum / MOVING_AVERAGE_SIZE;
 
-//		printf("%u\n", moving_average);
-		pulse_value = (uint16_t)(moving_average * 1000 / 4096);
-		set_pulse_values(pulse_value, pulse_value, pulse_value);
-		// Here you can use 'moving_average' for further processing
+		/* Set flag to indicate that new moving averages are available. */
+		potentiometer_flag = NEW_READING_READY;
 	}
 }

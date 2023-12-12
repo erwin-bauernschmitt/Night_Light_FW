@@ -26,6 +26,8 @@
 #include "LED_driver_config.h"
 #include "state_machine.h"
 #include "colour_control.h"
+#include "external_interrupts.h"
+#include "timers.h"
 #include <stdio.h>
 
 /* USER CODE END Includes */
@@ -48,6 +50,7 @@
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc1;
 ADC_HandleTypeDef hadc2;
+DMA_HandleTypeDef hdma_adc2;
 
 I2C_HandleTypeDef hi2c2;
 
@@ -55,13 +58,21 @@ TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim15;
 
-
 /* USER CODE BEGIN PV */
 
-uint32_t adc_buffer[MOVING_AVERAGE_SIZE] = {0};
-uint32_t adc_sum = 0;
+uint16_t pot1_moving_average_buffer[MOVING_AVERAGE_SIZE] = {0};
+uint16_t pot2_moving_average_buffer[MOVING_AVERAGE_SIZE] = {0};
+uint16_t pot3_moving_average_buffer[MOVING_AVERAGE_SIZE] = {0};
+uint16_t pot1_buffer_sum = 0;
+uint16_t pot2_buffer_sum = 0;
+uint16_t pot3_buffer_sum = 0;
 uint8_t buffer_index = 0;
-uint32_t moving_average = 0;
+volatile uint16_t pot1_moving_average = 0;
+volatile uint16_t pot2_moving_average = 0;
+volatile uint16_t pot3_moving_average = 0;
+volatile uint16_t adc2_dma_buffer[NUM_DMA_CHANNELS];
+
+volatile PotFlag potentiometer_flag = WAITING_FOR_READING;
 
 State colour_mode = WHITE_LIGHT;
 State previous_state = WHITE_LIGHT;
@@ -90,6 +101,7 @@ GPIO_PinState sensitivity_btn_s;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_ADC2_Init(void);
 static void MX_I2C2_Init(void);
@@ -134,6 +146,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_ADC1_Init();
   MX_ADC2_Init();
   MX_I2C2_Init();
@@ -144,6 +157,8 @@ int main(void)
   initialise_button_states();
 
   HAL_ADC_Start(&hadc1);
+//  HAL_ADC_Start(&hadc2);
+  HAL_ADC_Start_DMA(&hadc2, (uint32_t*)adc2_dma_buffer, NUM_DMA_CHANNELS);
   HAL_TIM_Base_Start_IT(&htim2);
 
   if (initialise_LED_drivers() != LED_DRIVER_OK) {
@@ -166,6 +181,15 @@ int main(void)
 	  if (event_flag != NO_EVENT) {
 		  update_state(event_flag);
 		  event_flag = NO_EVENT;  // Reset the flag after handling the event
+	  }
+
+	  if (potentiometer_flag == NEW_READING_READY) {
+//		  printf("%u    %u    %u\n", pot1_moving_average, pot2_moving_average, pot3_moving_average);
+		  /* Set pulse value according to brightness potentiometer. */
+		  uint16_t pulse_value = (uint16_t)(pot1_moving_average * COUNTER_PERIOD / ADC_RES);
+		  set_pulse_values(pulse_value, pulse_value, pulse_value);
+		  /* Reset potentiometer flag. */
+		  potentiometer_flag = WAITING_FOR_READING;
 	  }
 
 //	  /* To test HAL_GetTick: */
@@ -323,7 +347,7 @@ static void MX_ADC2_Init(void)
   hadc2.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc2.Init.DataAlign = ADC_DATAALIGN_RIGHT;
   hadc2.Init.NbrOfConversion = 2;
-  hadc2.Init.DMAContinuousRequests = DISABLE;
+  hadc2.Init.DMAContinuousRequests = ENABLE;
   hadc2.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
   hadc2.Init.LowPowerAutoWait = DISABLE;
   hadc2.Init.Overrun = ADC_OVR_DATA_OVERWRITTEN;
@@ -578,6 +602,22 @@ static void MX_TIM15_Init(void)
 
   /* USER CODE END TIM15_Init 2 */
   HAL_TIM_MspPostInit(&htim15);
+
+}
+
+/**
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void)
+{
+
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA2_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA2_Channel1_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Channel1_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Channel1_IRQn);
 
 }
 
