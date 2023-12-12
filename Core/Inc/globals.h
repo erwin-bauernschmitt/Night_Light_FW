@@ -16,16 +16,13 @@
 #include <stdint.h>
 #include "stm32f3xx_hal.h"
 #include "state_machine.h"
+#include "timers.h"
 
 
 #define MOVING_AVERAGE_SIZE 5	///< Number of potentiometer values averaged.
 #define COUNTER_PERIOD 1000		///< Period of PWM timer counters.
-
-
-extern uint32_t adc_buffer[MOVING_AVERAGE_SIZE];
-extern uint32_t adc_sum;
-extern uint8_t buffer_index;
-extern uint32_t moving_average;
+#define NUM_DMA_CHANNELS 2		///< Number of ADC channels read with DMA.
+#define ADC_RES 4096 			///< Number of distinct possible ADC values.
 
 
 extern ADC_HandleTypeDef hadc1;
@@ -34,6 +31,21 @@ extern I2C_HandleTypeDef hi2c2;
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim15;
+
+
+extern uint16_t pot1_moving_average_buffer[MOVING_AVERAGE_SIZE];
+extern uint16_t pot2_moving_average_buffer[MOVING_AVERAGE_SIZE];
+extern uint16_t pot3_moving_average_buffer[MOVING_AVERAGE_SIZE];
+extern uint16_t pot1_buffer_sum;
+extern uint16_t pot2_buffer_sum;
+extern uint16_t pot3_buffer_sum;
+extern uint8_t buffer_index;
+extern volatile uint16_t pot1_moving_average;
+extern volatile uint16_t pot2_moving_average;
+extern volatile uint16_t pot3_moving_average;
+extern volatile uint16_t adc2_dma_buffer[NUM_DMA_CHANNELS];
+
+volatile extern PotFlag potentiometer_flag;
 
 extern State colour_mode;
 extern State previous_state;
