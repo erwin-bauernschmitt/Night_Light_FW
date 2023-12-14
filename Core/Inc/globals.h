@@ -64,5 +64,12 @@ extern uint32_t brightness_btn_time;
 extern uint32_t colour_btn_time;
 extern uint32_t sensitivity_btn_time;
 
+extern uint8_t red_thermal_error_flag;
+extern uint8_t green_thermal_error_flag;
+extern uint8_t blue_thermal_error_flag;
+extern uint16_t red_lod_flag;
+extern uint16_t green_lod_flag;
+extern uint16_t blue_lod_flag;
+
 
 #endif /* GLOBALS_H */
