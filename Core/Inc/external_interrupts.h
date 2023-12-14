@@ -12,6 +12,7 @@
 #include <stdint.h>
 #include "hardware_defines.h"
 #include "state_machine.h"
+#include "colour_control.h"
 
 
 typedef struct {
@@ -27,3 +28,5 @@ typedef struct {
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin);
 void handle_button(ButtonInfo *button, uint32_t current_time);
 void initialise_button_states(void);
+void determine_led_errors(void);
+void print_binary(uint16_t value);

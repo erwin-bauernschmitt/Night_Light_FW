@@ -91,9 +91,12 @@ uint32_t brightness_btn_time;
 uint32_t colour_btn_time;
 uint32_t sensitivity_btn_time;
 
-GPIO_PinState brightness_btn_s;
-GPIO_PinState colour_btn_s;
-GPIO_PinState sensitivity_btn_s;
+uint8_t red_thermal_error_flag = 0;
+uint8_t green_thermal_error_flag = 0;
+uint8_t blue_thermal_error_flag = 0;
+uint16_t red_lod_flag = 0;
+uint16_t green_lod_flag = 0;
+uint16_t blue_lod_flag = 0;
 
 
 /* USER CODE END PV */
@@ -154,10 +157,10 @@ int main(void)
   MX_TIM15_Init();
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
+  determine_led_errors();
   initialise_button_states();
 
   HAL_ADC_Start(&hadc1);
-//  HAL_ADC_Start(&hadc2);
   HAL_ADC_Start_DMA(&hadc2, (uint32_t*)adc2_dma_buffer, NUM_DMA_CHANNELS);
   HAL_TIM_Base_Start_IT(&htim2);
 
@@ -168,6 +171,9 @@ int main(void)
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
   HAL_TIM_PWM_Start(&htim15, TIM_CHANNEL_1);
+
+
+
 
   /* For testing only: */
   event_flag = AMBIENT_LIGHT_TURN_ON;		///< Force out of STANDBY state.
@@ -191,6 +197,7 @@ int main(void)
 		  /* Reset potentiometer flag. */
 		  potentiometer_flag = WAITING_FOR_READING;
 	  }
+
 
 //	  /* To test HAL_GetTick: */
 //	  uint32_t time = HAL_GetTick();

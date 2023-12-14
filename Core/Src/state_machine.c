@@ -9,9 +9,12 @@
  */
 
 
+#include <stdio.h>
 #include "state_machine.h"
 #include "globals.h"
 #include "colour_control.h"
+#include "external_interrupts.h"
+
 
 
 /**
@@ -24,9 +27,7 @@
 void update_state(EventType event) {
 	switch (current_state) {
 		case STANDBY:
-			if (event == AMBIENT_LIGHT_TURN_ON) {
-				current_state = colour_mode;
-			}
+			handle_standby(event);
 			break;
 
 		case WHITE_LIGHT:
@@ -83,6 +84,10 @@ void handle_standby(EventType event) {
 			update_light_cal_substate(event);
 			break;
 
+		case POT_3_BUTTON_PRESS:
+			determine_led_errors();
+			break;
+
 		default:
 			// Intentionally ignoring other cases as invalid inputs for process.
 			break;
@@ -128,6 +133,10 @@ void handle_white_light(EventType event) {
 			current_state = STANDBY;
 			break;
 
+		case POT_3_BUTTON_PRESS:
+			determine_led_errors();
+			break;
+
 		default:
 			// Intentionally ignoring other cases as invalid inputs for process.
 			break;
@@ -171,6 +180,10 @@ void handle_RGB_light(EventType event) {
 		case AMBIENT_LIGHT_TURN_OFF:
 			previous_state = RGB_LIGHT;
 			current_state = STANDBY;
+			break;
+
+		case POT_3_BUTTON_PRESS:
+			determine_led_errors();
 			break;
 
 		default:
