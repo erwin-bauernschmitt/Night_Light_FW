@@ -71,5 +71,7 @@ extern uint16_t red_lod_flag;
 extern uint16_t green_lod_flag;
 extern uint16_t blue_lod_flag;
 
+extern volatile uint32_t mlux_reading;
+
 
 #endif /* GLOBALS_H */

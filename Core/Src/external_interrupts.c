@@ -72,6 +72,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 		case XERR_B_Pin:
 			determine_led_errors();
 			break;
+
+		case INT_Pin:
+			read_light_sensor_data();
+			break;
 	}
 }
 
@@ -222,6 +226,182 @@ void determine_led_errors(void) {
 	/* Resume reading potentiometers and updating LED pulse values. */
 	HAL_TIM_Base_Start_IT(&htim2);
 }
+
+
+/**
+ * @brief Reads the light sensor's data over I2C, saving result in mlux_reading.
+ *
+ * @return None.
+ */
+ReadStatus read_light_sensor_data(void) {
+	HAL_StatusTypeDef result;
+	uint8_t opt4001_addr = 0x44 << 1;
+
+	/**
+	 * Register 00h Contents:
+	 *
+	 * D15-D12 EXPONENT		: Exponent value (0-8)
+	 * D11-D00 RESULT_MSB	: 12 MSBs of the 20-bit mantissa.
+	 */
+	uint8_t reg_0_addr = 0x00;
+	uint8_t reg_0_data[2] = {0, 0};
+
+	result = HAL_I2C_Mem_Read(&hi2c2,
+							  opt4001_addr,
+							  reg_0_addr,
+							  I2C_MEMADD_SIZE_8BIT,
+							  reg_0_data,
+							  sizeof(reg_0_data),
+							  HAL_MAX_DELAY);
+	if (result != HAL_OK) {
+		printf("Failed to read OPT4001 Register 0.\n");
+		return READ_FAILED;
+	}
+
+	/**
+	 * Register 01h Contents:
+	 *
+	 * D15-D08 RESULT_LSB	: 8 LSBs of the 20-bit mantissa.
+	 * D07-D04 COUNTER		: Rolling sample counter.
+	 * D03-D00 CRC			: Cyclic redundancy check bits.
+	 */
+	uint8_t reg_1_addr = 0x01;
+	uint8_t reg_1_data[2] = {0, 0};
+
+	result = HAL_I2C_Mem_Read(&hi2c2,
+							  opt4001_addr,
+							  reg_1_addr,
+							  I2C_MEMADD_SIZE_8BIT,
+							  reg_1_data,
+							  sizeof(reg_1_data),
+							  HAL_MAX_DELAY);
+	if (result != HAL_OK) {
+		printf("Failed to read OPT4001 Register 1.\n");
+		return READ_FAILED;
+	}
+
+	/* Calculates the lux reading in milli-lux. */
+	uint32_t exponent = (uint32_t)((reg_0_data[0] >> 4) & 0x0F);
+	uint32_t mantissa = ((uint32_t)(reg_0_data[0] & 0x0F) << 16) |
+						((uint32_t)(reg_0_data[1]) << 8) |
+						(uint32_t)(reg_1_data[0]);
+	uint32_t ADC_code = mantissa << exponent;
+	mlux_reading = ADC_code * 437.5e-3;
+
+//	printf("%lu\n", mlux_reading);
+
+	return READ_SUCCESSFUL;
+}
+
+
+/**
+ * @brief Configures the light sensor's registers over I2C.
+ *
+ * @return None.
+ */
+InitStatus initialise_light_sensor(void) {
+	HAL_StatusTypeDef result;
+	uint8_t opt4001_addr = 0x44 << 1;
+
+	uint8_t reg_10_addr = 0x0A;
+	uint8_t reg_10_config[2] = {0b00110010, 0b00110000};
+	uint8_t reg_10_confirm[2] = {0, 0};
+	/**
+	 * Register 0Ah Configuration:
+	 *
+	 * D15-D15 QWAKE = 0b0 				: Quick wake disabled.
+	 * D14-D14 0 = 0b0 					: Fixed value.
+	 * D13-D10 RANGE = 0b1100 			: Auto-range light level.
+	 * D09-D06 CONVERSION_TIME = 0b1000 : 100ms conversion time.
+	 * D05-D04 OPERATING_MODE = 0b11 	: Continuous conversion.
+	 * D03-D03 LATCH = 0b0 				: Transparent hysteresis mode.
+	 * D02-D02 INT_POL = 0b0 			: INT pin active low.
+	 * D01-D00 FAULT_COUNT = 0b00 		: One fault event.
+	 */
+	result = HAL_I2C_Mem_Write(&hi2c2,
+					  	       opt4001_addr,			// Device address.
+							   reg_10_addr,				// Register address.
+							   I2C_MEMADD_SIZE_8BIT,	// Address size.
+							   reg_10_config,			// Data packet pointer.
+							   sizeof(reg_10_config),	// Size of data packet.
+							   HAL_MAX_DELAY);			// Timeout delay.
+	if (result != HAL_OK) {
+		printf("Failed to configure OPT4001 Register 10.\n");
+		return INIT_FAILED;
+	}
+	else {
+			result = HAL_I2C_Mem_Read(&hi2c2,
+									  opt4001_addr,
+									  reg_10_addr,
+									  I2C_MEMADD_SIZE_8BIT,
+									  reg_10_confirm,
+									  sizeof(reg_10_confirm),
+									  HAL_MAX_DELAY);
+			if (result != HAL_OK) {
+				printf("Failed to read OPT4001 Register 10.\n ");
+				return INIT_FAILED;
+			}
+			else {
+				if (reg_10_confirm[0] == reg_10_config[0] && reg_10_confirm[1] == reg_10_config[1]) {
+					printf("OPT4001 Register 10 configured successfully.\n");
+				}
+				else {
+					printf("Failed to configure OPT4001 Register 10 successfully.\n");
+					return INIT_FAILED;
+				}
+			}
+	}
+
+	HAL_Delay(1);
+
+	uint8_t reg_11_addr = 0x0B;
+	uint8_t reg_11_config[2] = {0b10000000, 0b00010100};
+	uint8_t reg_11_confirm[2] = {0, 0};
+	/**
+	 * Register 0Bh Configuration:
+	 *
+	 * D15-D05 1024 = 0b10000000000 : Fixed value.
+	 * D04-D04 INT_DIR = 0b1		: INT pin configured as output.
+	 * D03-D02 INT_CFG = 0b01		: INT pin asserted after each conversion.
+	 * D01-D01 0 = 0b0				: Fixed value.
+	 * D00-D00 I2C_BURST = 0b0		: I2C burst mode off.
+	 */
+	result = HAL_I2C_Mem_Write(&hi2c2,
+				      	  	   opt4001_addr,
+							   reg_11_addr,
+							   I2C_MEMADD_SIZE_8BIT,
+							   reg_11_config,
+							   sizeof(reg_11_config),
+							   HAL_MAX_DELAY);
+	if (result != HAL_OK) {
+		printf("Failed to configure OPT4001 Register 11.\n");
+		return INIT_FAILED;
+	}
+	else {
+		result = HAL_I2C_Mem_Read(&hi2c2,
+								  opt4001_addr,
+								  reg_11_addr,
+								  I2C_MEMADD_SIZE_8BIT,
+								  reg_11_confirm,
+								  sizeof(reg_11_confirm),
+								  HAL_MAX_DELAY);
+		if (result != HAL_OK) {
+			printf("Failed to read OPT4001 Register 11.\n ");
+			return INIT_FAILED;
+		}
+		else {
+			if (reg_11_confirm[0] == reg_11_config[0] && reg_11_confirm[1] == reg_11_config[1]) {
+				printf("OPT4001 Register 11 configured successfully.\n");
+				return INIT_SUCCESSFUL;
+			}
+			else {
+				printf("Failed to configure OPT4001 Register 11 successfully.\n");
+				return INIT_FAILED;
+			}
+		}
+	}
+}
+
 
 
 /**

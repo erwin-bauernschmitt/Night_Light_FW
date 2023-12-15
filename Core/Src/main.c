@@ -98,6 +98,8 @@ uint16_t red_lod_flag = 0;
 uint16_t green_lod_flag = 0;
 uint16_t blue_lod_flag = 0;
 
+volatile uint32_t mlux_reading = 0xFFFFFFFF;
+
 
 /* USER CODE END PV */
 
@@ -171,6 +173,13 @@ int main(void)
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
   HAL_TIM_PWM_Start(&htim15, TIM_CHANNEL_1);
+
+  if (initialise_light_sensor() != INIT_SUCCESSFUL) {
+	  printf("Faild to initialise OPT4001 Light Sensor.\n");
+  }
+  else {
+	  printf("Successfully initialised OPT4001 Light Sensor.\n");
+  }
 
 
 
@@ -406,7 +415,7 @@ static void MX_I2C2_Init(void)
 
   /* USER CODE END I2C2_Init 1 */
   hi2c2.Instance = I2C2;
-  hi2c2.Init.Timing = 0x0010061A;
+  hi2c2.Init.Timing = 0x00100A8E;
   hi2c2.Init.OwnAddress1 = 0;
   hi2c2.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
   hi2c2.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
@@ -680,7 +689,7 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : INT_Pin */
   GPIO_InitStruct.Pin = INT_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(INT_GPIO_Port, &GPIO_InitStruct);
 
