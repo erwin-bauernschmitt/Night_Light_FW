@@ -98,6 +98,8 @@ uint16_t red_lod_flag = 0;
 uint16_t green_lod_flag = 0;
 uint16_t blue_lod_flag = 0;
 
+volatile uint32_t mlux_reading = 0xFFFFFFFF;
+
 
 /* USER CODE END PV */
 
@@ -687,7 +689,7 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : INT_Pin */
   GPIO_InitStruct.Pin = INT_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(INT_GPIO_Port, &GPIO_InitStruct);
 

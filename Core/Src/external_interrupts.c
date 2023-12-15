@@ -74,7 +74,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 			break;
 
 		case INT_Pin:
-
+			read_light_sensor_data();
 			break;
 	}
 }
@@ -229,14 +229,69 @@ void determine_led_errors(void) {
 
 
 /**
- * @brief Reads the light sensor's data over I2C,
+ * @brief Reads the light sensor's data over I2C, saving result in mlux_reading.
  *
  * @return None.
  */
-//void read_light_sensor_data(void) {
-//	uint8_t opt4001_addr = 0x44 << 1;
-//	uint8_t register_0 = 0x00;
-//}
+ReadStatus read_light_sensor_data(void) {
+	HAL_StatusTypeDef result;
+	uint8_t opt4001_addr = 0x44 << 1;
+
+	/**
+	 * Register 00h Contents:
+	 *
+	 * D15-D12 EXPONENT		: Exponent value (0-8)
+	 * D11-D00 RESULT_MSB	: 12 MSBs of the 20-bit mantissa.
+	 */
+	uint8_t reg_0_addr = 0x00;
+	uint8_t reg_0_data[2] = {0, 0};
+
+	result = HAL_I2C_Mem_Read(&hi2c2,
+							  opt4001_addr,
+							  reg_0_addr,
+							  I2C_MEMADD_SIZE_8BIT,
+							  reg_0_data,
+							  sizeof(reg_0_data),
+							  HAL_MAX_DELAY);
+	if (result != HAL_OK) {
+		printf("Failed to read OPT4001 Register 0.\n");
+		return READ_FAILED;
+	}
+
+	/**
+	 * Register 01h Contents:
+	 *
+	 * D15-D08 RESULT_LSB	: 8 LSBs of the 20-bit mantissa.
+	 * D07-D04 COUNTER		: Rolling sample counter.
+	 * D03-D00 CRC			: Cyclic redundancy check bits.
+	 */
+	uint8_t reg_1_addr = 0x01;
+	uint8_t reg_1_data[2] = {0, 0};
+
+	result = HAL_I2C_Mem_Read(&hi2c2,
+							  opt4001_addr,
+							  reg_1_addr,
+							  I2C_MEMADD_SIZE_8BIT,
+							  reg_1_data,
+							  sizeof(reg_1_data),
+							  HAL_MAX_DELAY);
+	if (result != HAL_OK) {
+		printf("Failed to read OPT4001 Register 1.\n");
+		return READ_FAILED;
+	}
+
+	/* Calculates the lux reading in milli-lux. */
+	uint32_t exponent = (uint32_t)((reg_0_data[0] >> 4) & 0x0F);
+	uint32_t mantissa = ((uint32_t)(reg_0_data[0] & 0x0F) << 16) |
+						((uint32_t)(reg_0_data[1]) << 8) |
+						(uint32_t)(reg_1_data[0]);
+	uint32_t ADC_code = mantissa << exponent;
+	mlux_reading = ADC_code * 437.5e-3;
+
+//	printf("%lu\n", mlux_reading);
+
+	return READ_SUCCESSFUL;
+}
 
 
 /**
