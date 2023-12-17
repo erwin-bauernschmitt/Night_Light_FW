@@ -16,6 +16,7 @@
 
 
 typedef struct {
+	uint8_t button_number;
     uint32_t *last_time;
     ButtonState *state;
     EventType short_press_event;

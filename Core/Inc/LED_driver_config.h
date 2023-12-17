@@ -8,7 +8,6 @@
  *******************************************************************************
  */
 
-
 #ifndef LED_DRIVER_CONFIG_H
 #define LED_DRIVER_CONFIG_H
 
@@ -23,8 +22,6 @@ typedef enum {
 	LED_DRIVER_OPEN_ERROR		///< Open LED detected by drivers.
 } LED_Driver_Status;
 
-
 LED_Driver_Status initialise_LED_drivers(void);
-
 
 #endif /* LED_DRIVER_CONFIG_H */

@@ -8,13 +8,10 @@
  *******************************************************************************
  */
 
-
 #ifndef HARDWARE_DEFINES_H
 #define HARDWARE_DEFINES_H
 
-
 #include "stm32f3xx_hal.h"
-
 
 #define BRIGHTNESS_VAL_Pin GPIO_PIN_3
 #define BRIGHTNESS_VAL_GPIO_Port GPIOA
@@ -76,6 +73,5 @@
 #define COLOUR_BTN_Pin GPIO_PIN_9
 #define COLOUR_BTN_GPIO_Port GPIOB
 #define COLOUR_BTN_EXTI_IRQn EXTI9_5_IRQn
-
 
 #endif /* HARDWARE_DEFINES_H */
