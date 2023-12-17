@@ -101,6 +101,10 @@ uint16_t blue_lod_flag = 0;
 
 volatile uint32_t mlux_reading = 0xFFFFFFFF;
 
+uint16_t pot1_calibration_buffer[2];
+uint16_t pot2_calibration_buffer[2];
+uint16_t pot3_calibration_buffer[2];
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -145,7 +149,7 @@ int main(void) {
 
 	/* USER CODE BEGIN SysInit */
 	printf("          \n");
-	printf("Night Light v0.1\n");
+	printf("Night Light v0.2\n");
 	printf("Happy (belated) zeroth birthday, Gabby!\n\n\n\n");
 
 #ifdef DEBUG_INIT
@@ -207,6 +211,11 @@ int main(void) {
 	printf("\nLED PWM STARTED\n");
 #endif /* DEBUG_INIT */
 
+#ifdef DEBUG_INIT
+	printf("\nINITIALISATION PROCESS COMPLETE\n");
+	printf("ENTERING MAIN WHILE LOOP...\n\n");
+#endif /* DEBUG_INIT */
+
 	/* For testing only: */
 	event_flag = AMBIENT_LIGHT_TURN_ON;		///< Force out of STANDBY state.
 
@@ -214,11 +223,11 @@ int main(void) {
 
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
-#ifdef DEBUG_INIT
-	printf("\nINITIALISATION PROCESS COMPLETE\n");
-	printf("ENTERING MAIN WHILE LOOP...\n\n");
-#endif /* DEBUG_INIT */
+
+	uint16_t pulse_values[3];
+
 	while (1) {
+
 		if (event_flag != NO_EVENT) {
 			update_state(event_flag);
 			event_flag = NO_EVENT;  // Reset the flag after handling the event
@@ -227,9 +236,8 @@ int main(void) {
 		if (potentiometer_flag == NEW_READING_READY) {
 //		  printf("%u    %u    %u\n", pot1_moving_average, pot2_moving_average, pot3_moving_average);
 			/* Set pulse value according to brightness potentiometer. */
-			uint16_t pulse_value = (uint16_t) (pot1_moving_average
-					* COUNTER_PERIOD / ADC_RES);
-			set_pulse_values(pulse_value, pulse_value, pulse_value);
+			calculate_pulse_values(pulse_values);
+			set_pulse_values(pulse_values);
 			/* Reset potentiometer flag. */
 			potentiometer_flag = WAITING_FOR_READING;
 		}
