@@ -11,6 +11,8 @@
 #ifndef LED_DRIVER_CONFIG_H
 #define LED_DRIVER_CONFIG_H
 
+#include <stdint.h>
+
 /**
  * @brief Represents the states of the LED drivers.
  */
@@ -22,6 +24,6 @@ typedef enum {
 	LED_DRIVER_OPEN_ERROR		///< Open LED detected by drivers.
 } LED_Driver_Status;
 
-LED_Driver_Status initialise_LED_drivers(void);
+LED_Driver_Status initialise_LED_drivers(uint8_t *led_init_config);
 
 #endif /* LED_DRIVER_CONFIG_H */

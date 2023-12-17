@@ -14,6 +14,7 @@
 #include "colour_control.h"
 #include "external_interrupts.h"
 #include "debug_flags.h"
+#include "LED_driver_config.h"
 
 /**
  * @brief Updates the state of the night light in response to events.
@@ -366,6 +367,7 @@ void update_pot_cal_substate(EventType event) {
 			}
 #endif /* DEBUG_STATE_MACHINE */
 
+			/* Print results over SWO. */
 			printf("\nPOTENTIOMETER CALIBRATION READINGS\n");
 			printf("Pot 1:\n");
 			printf("Lower = %4u\n", pot1_calibration_buffer[0]);
@@ -390,281 +392,74 @@ void update_pot_cal_substate(EventType event) {
  * @return None.
  */
 void update_led_cal_substate(EventType event) {
-	switch (led_cal_substate) {
-	case LED_CALIBRATION_START:
 #ifdef DEBUG_STATE_MACHINE
-		printf("Current substate: LED_CALIBRATION_START\n");
+	static const char *substate_names[] = { "LED_CALIBRATION_START", "LED_1",
+			"LED_2", "LED_3", "LED_4", "LED_5", "LED_6", "LED_7", "LED_8",
+			"LED_9", "LED_10", "LED_11", "LED_12", "LED_13", "LED_14", "LED_15",
+			"LED_16" };
+
+	printf("Current substate: %s\n", substate_names[led_cal_substate]);
 #endif /* DEBUG_STATE_MACHINE */
-		/* Flash white LEDs twice to indicate start of calibration. */
+
+	/* Handle special state of LED_CALIBRATION_START. */
+	if (led_cal_substate == LED_CALIBRATION_START) {
+		/* Notification pulses for the beginning of the calibration process. */
 		double_pulse();
-		/* Each potentiometer now changes an RGB colour channel.  */
-		/* Turn off all LEDs except for LED 1. */
-		led_cal_substate = LED_1;
-#ifdef DEBUG_STATE_MACHINE
-		printf("New substate: LED_1\n");
-#endif /* DEBUG_STATE_MACHINE */
-		break;
 
-	case LED_1:
-#ifdef DEBUG_STATE_MACHINE
-		printf("Current substate: LED_1\n");
-#endif /* DEBUG_STATE_MACHINE */
-		if (event == POT_2_BUTTON_PRESS) {
-			/* Save calibration values in buffer. */
-			/* Turn off LED 1, turn on LED 2. */
-			/* Flash White LEDs once to indicate capture. */
-			single_pulse();
-			led_cal_substate = LED_2;
-#ifdef DEBUG_STATE_MACHINE
-			printf("New substate: LED_2\n");
-#endif /* DEBUG_STATE_MACHINE */
-		}
-		break;
+		/* Turn the first LED on. */
+		uint8_t led_init_config[16] = { RESET };
+		led_init_config[led_cal_substate] = SET;
+		initialise_LED_drivers(led_init_config);
 
-	case LED_2:
+		/* Increment to the next substate. */
+		led_cal_substate++;
 #ifdef DEBUG_STATE_MACHINE
-		printf("Current substate: LED_2\n");
+		printf("New substate: %s\n", substate_names[led_cal_substate]);
 #endif /* DEBUG_STATE_MACHINE */
-		if (event == POT_2_BUTTON_PRESS) {
-			/* Save calibration values in buffer. */
-			/* Turn off LED 2, turn on LED 3. */
-			/* Flash White LEDs once to indicate capture. */
-			single_pulse();
-			led_cal_substate = LED_3;
-#ifdef DEBUG_STATE_MACHINE
-			printf("New substate: LED_3\n");
-#endif /* DEBUG_STATE_MACHINE */
-		}
-		break;
+	}
 
-	case LED_3:
-#ifdef DEBUG_STATE_MACHINE
-		printf("Current substate: LED_3\n");
-#endif /* DEBUG_STATE_MACHINE */
-		if (event == POT_2_BUTTON_PRESS) {
-			/* Save calibration values in buffer. */
-			/* Turn off LED 3, turn on LED 4. */
-			/* Flash White LEDs once to indicate capture. */
-			single_pulse();
-			led_cal_substate = LED_4;
-#ifdef DEBUG_STATE_MACHINE
-			printf("New substate: LED_4\n");
-#endif /* DEBUG_STATE_MACHINE */
-		}
-		break;
+	/* Handle other states. */
+	else if (event == POT_2_BUTTON_PRESS) {
+		/* Capture the data. */
+		led_calibration_buffer[led_cal_substate - 1][0] =
+				(uint16_t) HAL_ADC_GetValue(&hadc1);
+		led_calibration_buffer[led_cal_substate - 1][1] = adc2_dma_buffer[1];
+		led_calibration_buffer[led_cal_substate - 1][2] = adc2_dma_buffer[0];
 
-	case LED_4:
-#ifdef DEBUG_STATE_MACHINE
-		printf("Current substate: LED_4\n");
-#endif /* DEBUG_STATE_MACHINE */
-		if (event == POT_2_BUTTON_PRESS) {
-			/* Save calibration values in buffer. */
-			/* Turn off LED 4, turn on LED 5. */
-			/* Flash White LEDs once to indicate capture. */
-			single_pulse();
-			led_cal_substate = LED_5;
-#ifdef DEBUG_STATE_MACHINE
-			printf("New substate: LED_5\n");
-#endif /* DEBUG_STATE_MACHINE */
-		}
-		break;
+		/* Notification pulse for data capture. */
+		single_pulse();
 
-	case LED_5:
-#ifdef DEBUG_STATE_MACHINE
-		printf("Current substate: LED_5\n");
-#endif /* DEBUG_STATE_MACHINE */
-		if (event == POT_2_BUTTON_PRESS) {
-			/* Save calibration values in buffer. */
-			/* Turn off LED 5, turn on LED 6. */
-			/* Flash White LEDs once to indicate capture. */
-			single_pulse();
-			led_cal_substate = LED_6;
-#ifdef DEBUG_STATE_MACHINE
-			printf("New substate: LED_6\n");
-#endif /* DEBUG_STATE_MACHINE */
-		}
-		break;
+		if (led_cal_substate < LED_16) {
+			/* Turn the next LED on. */
+			uint8_t led_init_config[16] = { RESET };
+			led_init_config[led_cal_substate] = SET;
+			initialise_LED_drivers(led_init_config);
 
-	case LED_6:
+			/* Increment to the next substate. */
+			led_cal_substate++;
 #ifdef DEBUG_STATE_MACHINE
-		printf("Current substate: LED_6\n");
+			printf("New substate: %s\n", substate_names[led_cal_substate]);
 #endif /* DEBUG_STATE_MACHINE */
-		if (event == POT_2_BUTTON_PRESS) {
-			/* Save calibration values in buffer. */
-			/* Turn off LED 6, turn on LED 7. */
-			/* Flash White LEDs once to indicate capture. */
-			single_pulse();
-			led_cal_substate = LED_7;
-#ifdef DEBUG_STATE_MACHINE
-			printf("New substate: LED_7\n");
-#endif /* DEBUG_STATE_MACHINE */
-		}
-		break;
+		} else {
+			/* Turn all of the LEDs on again. */
+			uint8_t led_init_config[16];
+			for (int i = 0; i < 16; i++) {
+				led_init_config[i] = SET;
+			}
+			initialise_LED_drivers(led_init_config);
 
-	case LED_7:
-#ifdef DEBUG_STATE_MACHINE
-		printf("Current substate: LED_7\n");
-#endif /* DEBUG_STATE_MACHINE */
-		if (event == POT_2_BUTTON_PRESS) {
-			/* Save calibration values in buffer. */
-			/* Turn off LED 7, turn on LED 8. */
-			/* Flash White LEDs once to indicate capture. */
-			single_pulse();
-			led_cal_substate = LED_8;
-#ifdef DEBUG_STATE_MACHINE
-			printf("New substate: LED_8\n");
-#endif /* DEBUG_STATE_MACHINE */
-		}
-		break;
-
-	case LED_8:
-#ifdef DEBUG_STATE_MACHINE
-		printf("Current substate: LED_8\n");
-#endif /* DEBUG_STATE_MACHINE */
-		if (event == POT_2_BUTTON_PRESS) {
-			/* Save calibration values in buffer. */
-			/* Turn off LED 8, turn on LED 9. */
-			/* Flash White LEDs once to indicate capture. */
-			single_pulse();
-			led_cal_substate = LED_9;
-#ifdef DEBUG_STATE_MACHINE
-			printf("New substate: LED_9\n");
-#endif /* DEBUG_STATE_MACHINE */
-		}
-		break;
-
-	case LED_9:
-#ifdef DEBUG_STATE_MACHINE
-		printf("Current substate: LED_9\n");
-#endif /* DEBUG_STATE_MACHINE */
-		if (event == POT_2_BUTTON_PRESS) {
-			/* Save calibration values in buffer. */
-			/* Turn off LED 9, turn on LED 10. */
-			/* Flash White LEDs once to indicate capture. */
-			single_pulse();
-			led_cal_substate = LED_10;
-#ifdef DEBUG_STATE_MACHINE
-			printf("New substate: LED_10\n");
-#endif /* DEBUG_STATE_MACHINE */
-		}
-		break;
-
-	case LED_10:
-#ifdef DEBUG_STATE_MACHINE
-		printf("Current substate: LED_10\n");
-#endif /* DEBUG_STATE_MACHINE */
-		if (event == POT_2_BUTTON_PRESS) {
-			/* Save calibration values in buffer. */
-			/* Turn off LED 10, turn on LED 11. */
-			/* Flash White LEDs once to indicate capture. */
-			single_pulse();
-			led_cal_substate = LED_11;
-#ifdef DEBUG_STATE_MACHINE
-			printf("New substate: LED_11\n");
-#endif /* DEBUG_STATE_MACHINE */
-		}
-		break;
-
-	case LED_11:
-#ifdef DEBUG_STATE_MACHINE
-		printf("Current substate: LED_11\n");
-#endif /* DEBUG_STATE_MACHINE */
-		if (event == POT_2_BUTTON_PRESS) {
-			/* Save calibration values in buffer. */
-			/* Turn off LED 11, turn on LED 12. */
-			/* Flash White LEDs once to indicate capture. */
-			single_pulse();
-			led_cal_substate = LED_12;
-#ifdef DEBUG_STATE_MACHINE
-			printf("New substate: LED_12\n");
-#endif /* DEBUG_STATE_MACHINE */
-		}
-		break;
-
-	case LED_12:
-#ifdef DEBUG_STATE_MACHINE
-		printf("Current substate: LED_12\n");
-#endif /* DEBUG_STATE_MACHINE */
-		if (event == POT_2_BUTTON_PRESS) {
-			/* Save calibration values in buffer. */
-			/* Turn off LED 12, turn on LED 13. */
-			/* Flash White LEDs once to indicate capture. */
-			single_pulse();
-			led_cal_substate = LED_13;
-#ifdef DEBUG_STATE_MACHINE
-			printf("New substate: LED_13\n");
-#endif /* DEBUG_STATE_MACHINE */
-		}
-		break;
-
-	case LED_13:
-#ifdef DEBUG_STATE_MACHINE
-		printf("Current substate: LED_13\n");
-#endif /* DEBUG_STATE_MACHINE */
-		if (event == POT_2_BUTTON_PRESS) {
-			/* Save calibration values in buffer. */
-			/* Turn off LED 13, turn on LED 14. */
-			/* Flash White LEDs once to indicate capture. */
-			single_pulse();
-			led_cal_substate = LED_14;
-#ifdef DEBUG_STATE_MACHINE
-			printf("New substate: LED_14\n");
-#endif /* DEBUG_STATE_MACHINE */
-		}
-		break;
-
-	case LED_14:
-#ifdef DEBUG_STATE_MACHINE
-		printf("Current substate: LED_14\n");
-#endif /* DEBUG_STATE_MACHINE */
-		if (event == POT_2_BUTTON_PRESS) {
-			/* Save calibration values in buffer. */
-			/* Turn off LED 14, turn on LED 15. */
-			/* Flash White LEDs once to indicate capture. */
-			single_pulse();
-			led_cal_substate = LED_15;
-#ifdef DEBUG_STATE_MACHINE
-			printf("New substate: LED_15\n");
-#endif /* DEBUG_STATE_MACHINE */
-		}
-		break;
-
-	case LED_15:
-#ifdef DEBUG_STATE_MACHINE
-		printf("Current substate: LED_15\n");
-#endif /* DEBUG_STATE_MACHINE */
-		if (event == POT_2_BUTTON_PRESS) {
-			/* Save calibration values in buffer. */
-			/* Turn off LED 15, turn on LED 16. */
-			/* Flash White LEDs once to indicate capture. */
-			single_pulse();
-			led_cal_substate = LED_16;
-#ifdef DEBUG_STATE_MACHINE
-			printf("New substate: LED_16\n");
-#endif /* DEBUG_STATE_MACHINE */
-		}
-		break;
-
-	case LED_16:
-#ifdef DEBUG_STATE_MACHINE
-		printf("Current substate: LED_16\n");
-#endif /* DEBUG_STATE_MACHINE */
-		if (event == POT_2_BUTTON_PRESS) {
-			/* Save calibration values in buffer. */
-			/* Turn off LED 16 */
-			/* Flash White LEDs once to indicate capture. */
-			single_pulse();
+			/* Notification pulses for the end of the calibration process. */
 			HAL_Delay(1000);
-			/* Save the completed calibration buffer to flash memory. */
-			/* Configure LED drivers with new dot correction values. */
-			/* Delay, then display white LED colours for 1s. */
 			long_pulse();
-			/* Flash white LEDs twice to indicate end of calibration. */
 			double_pulse();
+
+			/* Reset the substate. */
 			led_cal_substate = LED_CALIBRATION_START;
 #ifdef DEBUG_STATE_MACHINE
-			printf("New substate: LED_CALIBRATION_START\n");
+			printf("New substate: %s\n", substate_names[led_cal_substate]);
 #endif /* DEBUG_STATE_MACHINE */
+
+			/* Return to the previous state. */
 			current_state = previous_state;
 #ifdef DEBUG_STATE_MACHINE
 			if (current_state == STANDBY) {
@@ -675,9 +470,17 @@ void update_led_cal_substate(EventType event) {
 				printf("New state: RGB_LIGHT\n");
 			}
 #endif /* DEBUG_STATE_MACHINE */
-			break;
+
+			/* Print results over SWO. */
+			printf("\nLED CALIBRATION READINGS\n");
+			for (int i = 0; i < 16; i++) {
+				printf("LED %2u:    ", i);
+				printf("R = %4u        G = %4u        B = %4u\n",
+						led_calibration_buffer[i][0],
+						led_calibration_buffer[i][1],
+						led_calibration_buffer[i][2]);
+			}
 		}
-		break;
 	}
 }
 
