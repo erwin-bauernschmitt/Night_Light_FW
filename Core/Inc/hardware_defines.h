@@ -8,13 +8,10 @@
  *******************************************************************************
  */
 
-
 #ifndef HARDWARE_DEFINES_H
 #define HARDWARE_DEFINES_H
 
-
 #include "stm32f3xx_hal.h"
-
 
 #define BRIGHTNESS_VAL_Pin GPIO_PIN_3
 #define BRIGHTNESS_VAL_GPIO_Port GPIOA
@@ -26,7 +23,6 @@
 #define SOUT_R_GPIO_Port GPIOA
 #define XERR_R_Pin GPIO_PIN_7
 #define XERR_R_GPIO_Port GPIOA
-#define XERR_R_EXTI_IRQn EXTI9_5_IRQn
 #define BLANK_R_Pin GPIO_PIN_0
 #define BLANK_R_GPIO_Port GPIOB
 #define SIN_R_Pin GPIO_PIN_1
@@ -68,12 +64,14 @@
 #define XERR_B_EXTI_IRQn EXTI9_5_IRQn
 #define SOUT_B_Pin GPIO_PIN_6
 #define SOUT_B_GPIO_Port GPIOB
+#define BRIGHTNESS_BTN_Pin GPIO_PIN_7
+#define BRIGHTNESS_BTN_GPIO_Port GPIOB
+#define BRIGHTNESS_BTN_EXTI_IRQn EXTI9_5_IRQn
 #define SENSITIVITY_BTN_Pin GPIO_PIN_8
 #define SENSITIVITY_BTN_GPIO_Port GPIOB
 #define SENSITIVITY_BTN_EXTI_IRQn EXTI9_5_IRQn
 #define COLOUR_BTN_Pin GPIO_PIN_9
 #define COLOUR_BTN_GPIO_Port GPIOB
 #define COLOUR_BTN_EXTI_IRQn EXTI9_5_IRQn
-
 
 #endif /* HARDWARE_DEFINES_H */
