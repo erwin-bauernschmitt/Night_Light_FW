@@ -73,5 +73,9 @@ extern uint16_t blue_lod_flag;
 
 extern volatile uint32_t mlux_reading;
 
+extern uint16_t pot1_calibration_buffer[2];
+extern uint16_t pot2_calibration_buffer[2];
+extern uint16_t pot3_calibration_buffer[2];
+
 
 #endif /* GLOBALS_H */

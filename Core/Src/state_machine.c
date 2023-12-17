@@ -264,11 +264,7 @@ void update_pot_cal_substate(EventType event) {
 #ifdef DEBUG_STATE_MACHINE
 		printf("Current substate: POT_CALIBRATION_START\n");
 #endif /* DEBUG_STATE_MACHINE */
-		/* Flash white LEDs twice to indicate start of calibration. */
 		double_pulse();
-
-		/* Set all 16 LEDs to shine red for the first pot. */
-		/* Brightness pot works with unscaled values. */
 		pot_cal_substate = POT_1_LOWER;
 #ifdef DEBUG_STATE_MACHINE
 		printf("New substate: POT_1_LOWER\n");
@@ -280,8 +276,7 @@ void update_pot_cal_substate(EventType event) {
 		printf("Current substate: POT_1_LOWER\n");
 #endif /* DEBUG_STATE_MACHINE */
 		if (event == POT_1_BUTTON_PRESS) {
-			/* Save lower value in buffer */
-			/* Flash white LEDs once to indicate capture. */
+			pot1_calibration_buffer[0] = (uint16_t) HAL_ADC_GetValue(&hadc1);
 			single_pulse();
 			pot_cal_substate = POT_1_UPPER;
 #ifdef DEBUG_STATE_MACHINE
@@ -295,11 +290,8 @@ void update_pot_cal_substate(EventType event) {
 		printf("Current substate: POT_1_UPPER\n");
 #endif /* DEBUG_STATE_MACHINE */
 		if (event == POT_1_BUTTON_PRESS) {
-			/* Compare to lower value, save in buffer if greater. */
-			/* If less or equal, save 0 for lower and 4095 for upper. */
-			/* Flash White LEDs once to indicate capture. */
+			pot1_calibration_buffer[1] = (uint16_t) HAL_ADC_GetValue(&hadc1);
 			single_pulse();
-			/* Set all 16 LEDs to shine green for the second pot. */
 			pot_cal_substate = POT_2_LOWER;
 #ifdef DEBUG_STATE_MACHINE
 			printf("New substate: POT_2_LOWER\n");
@@ -311,9 +303,8 @@ void update_pot_cal_substate(EventType event) {
 #ifdef DEBUG_STATE_MACHINE
 		printf("Current substate: POT_2_LOWER\n");
 #endif /* DEBUG_STATE_MACHINE */
-		if (event == POT_1_BUTTON_PRESS) {
-			/* Save lower value in buffer */
-			/* Flash white LEDs once to indicate capture. */
+		if (event == POT_2_BUTTON_PRESS) {
+			pot2_calibration_buffer[0] = adc2_dma_buffer[1];
 			single_pulse();
 			pot_cal_substate = POT_2_UPPER;
 #ifdef DEBUG_STATE_MACHINE
@@ -326,12 +317,9 @@ void update_pot_cal_substate(EventType event) {
 #ifdef DEBUG_STATE_MACHINE
 		printf("Current substate: POT_2_UPPER\n");
 #endif /* DEBUG_STATE_MACHINE */
-		if (event == POT_1_BUTTON_PRESS) {
-			/* Compare to lower value, save in buffer if greater. */
-			/* If less or equal, save 0 for lower and 4095 for upper. */
-			/* Flash White LEDs once to indicate capture. */
+		if (event == POT_2_BUTTON_PRESS) {
+			pot2_calibration_buffer[1] = adc2_dma_buffer[1];
 			single_pulse();
-			/* Set all 16 LEDs to shine blue for the third pot. */
 			pot_cal_substate = POT_3_LOWER;
 #ifdef DEBUG_STATE_MACHINE
 			printf("New substate: POT_3_LOWER\n");
@@ -343,9 +331,8 @@ void update_pot_cal_substate(EventType event) {
 #ifdef DEBUG_STATE_MACHINE
 		printf("Current substate: POT_3_LOWER\n");
 #endif /* DEBUG_STATE_MACHINE */
-		if (event == POT_1_BUTTON_PRESS) {
-			/* Save lower value in buffer */
-			/* Flash white LEDs once to indicate capture. */
+		if (event == POT_3_BUTTON_PRESS) {
+			pot3_calibration_buffer[0] = adc2_dma_buffer[0];
 			single_pulse();
 			pot_cal_substate = POT_3_UPPER;
 #ifdef DEBUG_STATE_MACHINE
@@ -358,18 +345,11 @@ void update_pot_cal_substate(EventType event) {
 #ifdef DEBUG_STATE_MACHINE
 		printf("Current substate: POT_3_UPPER\n");
 #endif /* DEBUG_STATE_MACHINE */
-		if (event == POT_1_BUTTON_PRESS) {
-			/* Compare to lower value, save in buffer if greater. */
-			/* If less or equal, save 0 for lower and 4095 for upper. */
-			/* Flash White LEDs once to indicate capture. */
+		if (event == POT_3_BUTTON_PRESS) {
+			pot3_calibration_buffer[1] = adc2_dma_buffer[0];
 			single_pulse();
 			HAL_Delay(1000);
-			/* Set all 16 LEDs to shine blue for the third pot. */
-			/* Save the completed calibration buffer to flash memory. */
-			/* Scale potentiometer readings with tbe new calibration values */
-			/* Delay, then flash white LED colours for 1s. */
 			long_pulse();
-			/* Flash white LEDs twice to indicate end of calibration. */
 			double_pulse();
 			pot_cal_substate = POT_CALIBRATION_START;
 #ifdef DEBUG_STATE_MACHINE
@@ -385,6 +365,18 @@ void update_pot_cal_substate(EventType event) {
 				printf("New state: RGB_LIGHT\n");
 			}
 #endif /* DEBUG_STATE_MACHINE */
+
+			printf("\nPOTENTIOMETER CALIBRATION READINGS\n");
+			printf("Pot 1:\n");
+			printf("Lower = %4u\n", pot1_calibration_buffer[0]);
+			printf("Upper = %4u\n", pot1_calibration_buffer[1]);
+			printf("Pot 2:\n");
+			printf("Lower = %4u\n", pot2_calibration_buffer[0]);
+			printf("Upper = %4u\n", pot2_calibration_buffer[1]);
+			printf("Pot 3:\n");
+			printf("Lower = %4u\n", pot3_calibration_buffer[0]);
+			printf("Upper = %4u\n", pot3_calibration_buffer[1]);
+
 		}
 		break;
 	}
