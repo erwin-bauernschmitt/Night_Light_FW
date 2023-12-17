@@ -11,9 +11,11 @@
 
 #include "stm32f3xx_hal.h"
 #include <stdint.h>
+#include <stdio.h>
 #include "hardware_defines.h"
 #include "globals.h"
 #include "LED_driver_config.h"
+#include "debug_flags.h"
 
 
 /**
@@ -22,6 +24,10 @@
  * @return The status of the LED drivers.
  */
 LED_Driver_Status initialise_LED_drivers(void) {
+#ifdef DEBUG_INIT
+	printf("\nINITIALISING LED DRIVERS\n");
+	printf("Bit-banging...\n");
+#endif /* DEBUG_INIT */
 	/* Set MODE/XLAT/SCLK low for ON/OFF configuration mode. */
 	HAL_GPIO_WritePin(MODE_GPIO_Port, MODE_Pin, RESET);
 	HAL_GPIO_WritePin(XLAT_GPIO_Port, XLAT_Pin, RESET);
