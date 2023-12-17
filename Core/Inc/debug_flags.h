@@ -8,7 +8,6 @@
  *******************************************************************************
  */
 
-
 /* Uncomment the following defines to enable the relevant SWO messages. */
 
 //#define DEBUG_INIT			// Initialisation process.

@@ -8,22 +8,19 @@
  *******************************************************************************
  */
 
-
 #ifndef GLOBALS_H
 #define GLOBALS_H
-
 
 #include <stdint.h>
 #include "stm32f3xx_hal.h"
 #include "state_machine.h"
 #include "timers.h"
 
-
 #define MOVING_AVERAGE_SIZE 5	///< Number of potentiometer values averaged.
 #define COUNTER_PERIOD 1000		///< Period of PWM timer counters.
 #define NUM_DMA_CHANNELS 2		///< Number of ADC channels read with DMA.
 #define ADC_RES 4096 			///< Number of distinct possible ADC values.
-
+#define NUM_LEDS 16				///< Number of LEDs.
 
 extern ADC_HandleTypeDef hadc1;
 extern ADC_HandleTypeDef hadc2;
@@ -31,7 +28,6 @@ extern I2C_HandleTypeDef hi2c2;
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim15;
-
 
 extern uint16_t pot1_moving_average_buffer[MOVING_AVERAGE_SIZE];
 extern uint16_t pot2_moving_average_buffer[MOVING_AVERAGE_SIZE];
@@ -77,5 +73,6 @@ extern uint16_t pot1_calibration_buffer[2];
 extern uint16_t pot2_calibration_buffer[2];
 extern uint16_t pot3_calibration_buffer[2];
 
+extern uint16_t led_calibration_buffer[NUM_LEDS][3];
 
 #endif /* GLOBALS_H */

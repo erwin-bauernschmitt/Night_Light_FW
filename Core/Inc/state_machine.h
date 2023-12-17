@@ -8,10 +8,8 @@
  *******************************************************************************
  */
 
-
 #ifndef STATE_MACHINE_H
 #define STATE_MACHINE_H
-
 
 /**
  * @brief States the night light can be in.
@@ -25,7 +23,6 @@ typedef enum {
 	AMBIENT_LIGHT_CALIBRATION	///< Ambient light sensor calibration mode.
 } State;
 
-
 /**
  * @brief Substates of the potentiometer calibration mode.
  */
@@ -38,7 +35,6 @@ typedef enum {
 	POT_3_LOWER,				///< Capture ADC value of Pot 3 lower limit.
 	POT_3_UPPER,				///< Capture ADC value of Pot 3 upper limit.
 } PotCalibrationSubstate;
-
 
 /**
  * @brief Substates of the LED dot corretion calibration mode.
@@ -63,7 +59,6 @@ typedef enum {
 	LED_16,						///< Tune LED 16 colour channels and save.
 } LEDCalibrationSubstate;
 
-
 /**
  * @brief Substates of the ambient light sensor calibration mode.
  */
@@ -72,7 +67,6 @@ typedef enum {
 	LIT_ROOM,					///< Capture ambient effect of LEDs (lit room).
 	DARK_ROOM,					///< Capture ambient effect of LEDs (dark room).
 } LightCalibrationSubstate;
-
 
 /**
  * @brief Types of events that could trigger a state change.
@@ -89,14 +83,9 @@ typedef enum {
 	NO_EVENT = -1				///< No event.
 } EventType;
 
-
 typedef enum {
-	RELEASED,
-	PRESSED,
-	NONE,
-	INVALID = -1
+	RELEASED, PRESSED, NONE, INVALID = -1
 } ButtonState;
-
 
 void update_state(EventType event);
 
@@ -106,6 +95,5 @@ void handle_RGB_light(EventType event);
 void update_pot_cal_substate(EventType event);
 void update_led_cal_substate(EventType event);
 void update_light_cal_substate(EventType event);
-
 
 #endif /* STATE_MACHINE_H */

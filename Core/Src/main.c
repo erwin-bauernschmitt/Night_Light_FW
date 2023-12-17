@@ -105,6 +105,8 @@ uint16_t pot1_calibration_buffer[2];
 uint16_t pot2_calibration_buffer[2];
 uint16_t pot3_calibration_buffer[2];
 
+uint16_t led_calibration_buffer[NUM_LEDS][3];
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -171,7 +173,9 @@ int main(void) {
 
 	initialise_button_states();
 
-	if (initialise_LED_drivers() != LED_DRIVER_OK) {
+	uint8_t led_init_config[16] = { SET };
+
+	if (initialise_LED_drivers(led_init_config) != LED_DRIVER_OK) {
 #ifdef DEBUG_INIT
 		printf("LED DRIVER INITIALISATION FAILED\n");
 #endif /* DEBUG_INIT */
