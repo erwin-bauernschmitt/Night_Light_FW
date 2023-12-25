@@ -16,15 +16,17 @@
 #include <stdint.h>
 
 typedef struct {
-    uint32_t kelvin;
-    int32_t r;
-    int32_t g;
-    int32_t b;
+	uint32_t kelvin;
+	int32_t r;
+	int32_t g;
+	int32_t b;
 } KelvinToRGB;
 
 extern KelvinToRGB kelvin_table[];
 
-void search_rgb_to_kelvin(uint32_t kelvin, KelvinToRGB *lower, KelvinToRGB *higher);
-void pulse_for_kelvin(uint32_t kelvin, KelvinToRGB *lower, KelvinToRGB *higher, uint16_t *pulse_values);
+void search_rgb_to_kelvin(uint32_t kelvin, KelvinToRGB *lower,
+		KelvinToRGB *higher);
+void pulse_for_kelvin(uint32_t kelvin, KelvinToRGB *lower, KelvinToRGB *higher,
+		uint16_t *pulse_values);
 
 #endif /* KELVIN_TO_RGB_H */

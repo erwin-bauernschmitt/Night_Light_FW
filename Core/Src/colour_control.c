@@ -20,9 +20,11 @@ void calculate_pulse_values(uint16_t *pulse_values) {
 		uint32_t min_kelvin = kelvin_table[0].kelvin;
 		uint32_t max_kelvin = kelvin_table[KELVIN_TABLE_LENGTH - 1].kelvin;
 		uint32_t kelvin_range = max_kelvin - min_kelvin;
-		uint32_t kelvin = min_kelvin + (uint32_t)((uint64_t)pot2_moving_average * kelvin_range / ADC_RES);
+		uint32_t kelvin = min_kelvin
+				+ (uint32_t) ((uint64_t) pot2_moving_average * kelvin_range
+						/ ADC_RES);
 //		uint32_t kelvin = min_kelvin + pot2_moving_average * kelvin_range / ADC_RES;
-		kelvin = (uint16_t)kelvin;
+		kelvin = (uint16_t) kelvin;
 
 		KelvinToRGB lower;
 		KelvinToRGB higher;

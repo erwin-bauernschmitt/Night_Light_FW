@@ -60,7 +60,6 @@ typedef enum {
 	LED_16,						///< Tune LED 16 colour channels and save.
 } LEDCalibrationSubstate;
 
-
 /**
  * @brief Types of events that could trigger a state change.
  */
@@ -94,6 +93,5 @@ int baseline_calibration(uint32_t buffer[][2], int array_index);
 int brightness_calibration(uint32_t buffer[][2]);
 int colour_calibration(uint32_t buffer[][2]);
 int white_calibration(uint32_t buffer[][2]);
-
 
 #endif /* STATE_MACHINE_H */

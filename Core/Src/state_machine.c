@@ -464,72 +464,69 @@ void update_led_cal_substate(EventType event) {
 	}
 }
 
-
-
 int sensor_calibration_process(void) {
 	/* Flash white LEDs twice to indicate start of calibration. */
 	double_pulse();
-    printf("\nStarting calibration process.\n");
-    HAL_Delay(4000);
+	printf("\nStarting calibration process.\n");
+	HAL_Delay(4000);
 
-    int attempt;
-    const int max_attempts = 5;
+	int attempt;
+	const int max_attempts = 5;
 
-    /* Perform brightness calibration with retry limit. */
-    for (attempt = 0; attempt < max_attempts; attempt++) {
-    	HAL_Delay(1000);
-        if (brightness_calibration(brightness_calibration_buffer) == 0) {
-        	break;
-        }
-    }
-    if (attempt == max_attempts) {
-    	HAL_Delay(1000);
-    	red_long_pulse();
-    	HAL_Delay(1000);
-    	red_double_pulse();
-    	return -1;
-    }
+	/* Perform brightness calibration with retry limit. */
+	for (attempt = 0; attempt < max_attempts; attempt++) {
+		HAL_Delay(1000);
+		if (brightness_calibration(brightness_calibration_buffer) == 0) {
+			break;
+		}
+	}
+	if (attempt == max_attempts) {
+		HAL_Delay(1000);
+		red_long_pulse();
+		HAL_Delay(1000);
+		red_double_pulse();
+		return -1;
+	}
 
-    /* Perform white calibration with retry limit. */
-    for (attempt = 0; attempt < max_attempts; attempt++) {
-    	HAL_Delay(1000);
-        if (white_calibration(white_calibration_buffer) == 0) {
-        	break;
-        }
-    }
-    if (attempt == max_attempts) {
-    	HAL_Delay(1000);
-    	red_long_pulse();
-    	HAL_Delay(1000);
-    	red_double_pulse();
-    	return -1;
-    }
+	/* Perform white calibration with retry limit. */
+	for (attempt = 0; attempt < max_attempts; attempt++) {
+		HAL_Delay(1000);
+		if (white_calibration(white_calibration_buffer) == 0) {
+			break;
+		}
+	}
+	if (attempt == max_attempts) {
+		HAL_Delay(1000);
+		red_long_pulse();
+		HAL_Delay(1000);
+		red_double_pulse();
+		return -1;
+	}
 
-    /* Perform colour calibration with retry limit. */
-    for (attempt = 0; attempt < max_attempts; attempt++) {
-    	HAL_Delay(1000);
-        if (colour_calibration(colour_calibration_buffer) == 0) {
-        	break;
-        }
-    }
-    if (attempt == max_attempts) {
-    	HAL_Delay(1000);
-    	red_long_pulse();
-    	HAL_Delay(1000);
-    	red_double_pulse();
-    	return -1;
-    }
+	/* Perform colour calibration with retry limit. */
+	for (attempt = 0; attempt < max_attempts; attempt++) {
+		HAL_Delay(1000);
+		if (colour_calibration(colour_calibration_buffer) == 0) {
+			break;
+		}
+	}
+	if (attempt == max_attempts) {
+		HAL_Delay(1000);
+		red_long_pulse();
+		HAL_Delay(1000);
+		red_double_pulse();
+		return -1;
+	}
 
 	/* Notification pulses for the end of the calibration process. */
 	HAL_Delay(1000);
 	long_pulse();
 	double_pulse();
 
-    printf("\nCalibration process successful!\n");
+	printf("\nCalibration process successful!\n");
 
-    return 0;
+	return 0;
 }
-
 
 int baseline_calibration(uint32_t buffer[][2], int array_index) {
 	/* Turn the LEDs completely off and collect data. */
@@ -549,7 +546,6 @@ int baseline_calibration(uint32_t buffer[][2], int array_index) {
 	return 0;
 }
 
-
 int brightness_calibration(uint32_t buffer[][2]) {
 	/* Capture the initial baseline. */
 	int array_index = 0;
@@ -560,8 +556,9 @@ int brightness_calibration(uint32_t buffer[][2]) {
 
 	/* Incremenet through the brightness levels and collect data. */
 	for (uint16_t brightness = 0; brightness <= NUM_CAL_INCS; brightness++) {
-		uint16_t pulse_value = COUNTER_PERIOD - brightness * COUNTER_PERIOD / NUM_CAL_INCS;
-		uint16_t pulse_values[3] = {pulse_value, pulse_value, pulse_value};
+		uint16_t pulse_value = COUNTER_PERIOD
+				- brightness * COUNTER_PERIOD / NUM_CAL_INCS;
+		uint16_t pulse_values[3] = { pulse_value, pulse_value, pulse_value };
 		set_pulse_values(pulse_values);
 		printf("\nPULSE = %u\n", pulse_value);
 		if (collect_calibration_data(buffer, array_index) != 0) {
@@ -642,7 +639,8 @@ int colour_calibration(uint32_t buffer[][2]) {
 			break;
 		}
 
-		printf("\nRGB VECTOR = (%u, %u, %u)\n", pulse_values[0], pulse_values[1], pulse_values[2]);
+		printf("\nRGB VECTOR = (%u, %u, %u)\n", pulse_values[0],
+				pulse_values[1], pulse_values[2]);
 
 		/* Invert pulse values as BLANK is active low. */
 		pulse_values[0] = COUNTER_PERIOD - pulse_values[0];
@@ -675,7 +673,6 @@ int colour_calibration(uint32_t buffer[][2]) {
 	return 0;
 }
 
-
 int white_calibration(uint32_t buffer[][2]) {
 	/* Capture the initial baseline. */
 	int array_index = 0;
@@ -684,7 +681,8 @@ int white_calibration(uint32_t buffer[][2]) {
 	}
 	array_index += 1;
 
-	uint16_t kelvin_range = kelvin_table[KELVIN_TABLE_LENGTH-1].kelvin - kelvin_table[0].kelvin;
+	uint16_t kelvin_range = kelvin_table[KELVIN_TABLE_LENGTH - 1].kelvin
+			- kelvin_table[0].kelvin;
 	uint16_t kelvin_increment = kelvin_range / NUM_CAL_INCS;
 
 	uint16_t kelvin;
@@ -721,8 +719,6 @@ int white_calibration(uint32_t buffer[][2]) {
 	return 0;
 }
 
-
-
 int collect_calibration_data(uint32_t buffer[][2], int array_index) {
 	/* Discard conversion currently in progress. */
 	light_sensor_flag = WAITING;
@@ -746,7 +742,6 @@ int collect_calibration_data(uint32_t buffer[][2], int array_index) {
 	}
 	uint32_t mean = sum / NUM_CAL_SAMPLES;
 
-
 	/* Compute the sample variance. */
 	uint64_t square_difference_sum = 0;
 	for (int i = 0; i < NUM_CAL_SAMPLES; i++) {
@@ -758,7 +753,8 @@ int collect_calibration_data(uint32_t buffer[][2], int array_index) {
 	/* Compute the required sample size implied by the variance. */
 	uint32_t margin_of_error = mean / 50; // 2% of sample mean.
 	uint32_t z_score = 2;
-	uint32_t samples_required = z_score * z_score * variance / (margin_of_error * margin_of_error);
+	uint32_t samples_required = z_score * z_score * variance
+			/ (margin_of_error * margin_of_error);
 
 	/* Communicate results over SWO. */
 	printf("Sample mean: %lu\n", mean);
@@ -770,8 +766,7 @@ int collect_calibration_data(uint32_t buffer[][2], int array_index) {
 	if (samples_required < NUM_CAL_SAMPLES) {
 		buffer[array_index][0] = mean;
 		buffer[array_index][1] = variance;
-	}
-	else {
+	} else {
 		/* Notify user of failure. */
 		red_single_pulse();
 		printf("\nData collection failed.\n");

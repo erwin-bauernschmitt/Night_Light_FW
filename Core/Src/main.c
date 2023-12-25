@@ -233,7 +233,8 @@ int main(void) {
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
 
-	uint16_t pulse_values[3] = {COUNTER_PERIOD,COUNTER_PERIOD, COUNTER_PERIOD};
+	uint16_t pulse_values[3] =
+			{ COUNTER_PERIOD, COUNTER_PERIOD, COUNTER_PERIOD };
 	set_pulse_values(pulse_values);
 
 	while (1) {

@@ -8,10 +8,8 @@
  *******************************************************************************
  */
 
-
 #ifndef EXTERNAL_INTERRUPTS_H
 #define EXTERNAL_INTERRUPTS_H
-
 
 #include <stdint.h>
 #include "hardware_defines.h"
@@ -37,9 +35,7 @@ typedef enum {
 } ReadStatus;
 
 typedef enum {
-	IN_PROGRESS,
-	NEW_READY,
-	WAITING
+	IN_PROGRESS, NEW_READY, WAITING
 } SensorFlag;
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin);
@@ -49,6 +45,5 @@ void determine_led_errors(void);
 ReadStatus read_light_sensor_data(void);
 InitStatus initialise_light_sensor(void);
 void print_binary(uint16_t value);
-
 
 #endif /* EXTERNAL_INTERRUPTS_H */
