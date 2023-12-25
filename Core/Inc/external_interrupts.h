@@ -8,6 +8,11 @@
  *******************************************************************************
  */
 
+
+#ifndef EXTERNAL_INTERRUPTS_H
+#define EXTERNAL_INTERRUPTS_H
+
+
 #include <stdint.h>
 #include "hardware_defines.h"
 #include "state_machine.h"
@@ -31,6 +36,12 @@ typedef enum {
 	READ_SUCCESSFUL, READ_FAILED = -1
 } ReadStatus;
 
+typedef enum {
+	IN_PROGRESS,
+	NEW_READY,
+	WAITING
+} SensorFlag;
+
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin);
 void handle_button(ButtonInfo *button, uint32_t current_time);
 void initialise_button_states(void);
@@ -38,3 +49,6 @@ void determine_led_errors(void);
 ReadStatus read_light_sensor_data(void);
 InitStatus initialise_light_sensor(void);
 void print_binary(uint16_t value);
+
+
+#endif /* EXTERNAL_INTERRUPTS_H */
