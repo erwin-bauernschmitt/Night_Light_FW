@@ -80,7 +80,6 @@ State previous_state = WHITE_LIGHT;
 State current_state = STANDBY;
 PotCalibrationSubstate pot_cal_substate = POT_CALIBRATION_START;
 LEDCalibrationSubstate led_cal_substate = LED_CALIBRATION_START;
-LightCalibrationSubstate light_cal_substate = LIGHT_CALIBRATION_START;
 
 volatile EventType event_flag = NO_EVENT;
 
@@ -101,11 +100,17 @@ uint16_t blue_lod_flag = 0;
 
 volatile uint32_t mlux_reading = 0xFFFFFFFF;
 
+volatile SensorFlag light_sensor_flag = WAITING;
+
 uint16_t pot1_calibration_buffer[2];
 uint16_t pot2_calibration_buffer[2];
 uint16_t pot3_calibration_buffer[2];
 
 uint16_t led_calibration_buffer[NUM_LEDS][3];
+
+uint32_t brightness_calibration_buffer[1 + (NUM_CAL_INCS + 1) + 1][2];
+uint32_t white_calibration_buffer[1 + (NUM_CAL_INCS + 1) + 1][2];
+uint32_t colour_calibration_buffer[1 + (NUM_CAL_INCS + 1) + 1][2];
 
 /* USER CODE END PV */
 
@@ -228,7 +233,9 @@ int main(void) {
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
 
-	uint16_t pulse_values[3];
+	uint16_t pulse_values[3] =
+			{ COUNTER_PERIOD, COUNTER_PERIOD, COUNTER_PERIOD };
+	set_pulse_values(pulse_values);
 
 	while (1) {
 

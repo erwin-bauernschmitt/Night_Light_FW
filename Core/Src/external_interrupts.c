@@ -261,6 +261,8 @@ void determine_led_errors(void) {
  * @return None.
  */
 ReadStatus read_light_sensor_data(void) {
+	/* Set status flag to signal that a read is in progress. */
+	light_sensor_flag = IN_PROGRESS;
 	HAL_StatusTypeDef result;
 	uint8_t opt4001_addr = 0x44 << 1;
 
@@ -280,6 +282,7 @@ ReadStatus read_light_sensor_data(void) {
 #ifdef DEBUG_LIGHT_SENSOR
 		printf("Failed to read OPT4001 Register 0.\n");
 #endif /* DEBUG_LIGHT_SENSOR */
+		light_sensor_flag = WAITING;
 		return READ_FAILED;
 	}
 
@@ -300,6 +303,7 @@ ReadStatus read_light_sensor_data(void) {
 #ifdef DEBUG_LIGHT_SENSOR
 		printf("Failed to read OPT4001 Register 1.\n");
 #endif /* DEBUG_LIGHT_SENSOR */
+		light_sensor_flag = WAITING;
 		return READ_FAILED;
 	}
 
@@ -313,7 +317,7 @@ ReadStatus read_light_sensor_data(void) {
 #ifdef DEBUG_LIGHT_SENSOR
 	printf("%lu mlux\n", mlux_reading);
 #endif /* DEBUG_LIGHT_SENSOR */
-
+	light_sensor_flag = NEW_READY;
 	return READ_SUCCESSFUL;
 }
 

@@ -11,6 +11,8 @@
 #ifndef STATE_MACHINE_H
 #define STATE_MACHINE_H
 
+#include "stdint.h"
+
 /**
  * @brief States the night light can be in.
  */
@@ -20,7 +22,6 @@ typedef enum {
 	RGB_LIGHT,					///< Light on (RGB light spectrum).
 	POT_CALIBRATION,			///< Potentiometer calibration mode.
 	LED_CALIBRATION,			///< LED dot correction calibration mode.
-	AMBIENT_LIGHT_CALIBRATION	///< Ambient light sensor calibration mode.
 } State;
 
 /**
@@ -60,15 +61,6 @@ typedef enum {
 } LEDCalibrationSubstate;
 
 /**
- * @brief Substates of the ambient light sensor calibration mode.
- */
-typedef enum {
-	LIGHT_CALIBRATION_START,	///< Start of ambient light calibration process.
-	LIT_ROOM,					///< Capture ambient effect of LEDs (lit room).
-	DARK_ROOM,					///< Capture ambient effect of LEDs (dark room).
-} LightCalibrationSubstate;
-
-/**
  * @brief Types of events that could trigger a state change.
  */
 typedef enum {
@@ -94,6 +86,12 @@ void handle_white_light(EventType event);
 void handle_RGB_light(EventType event);
 void update_pot_cal_substate(EventType event);
 void update_led_cal_substate(EventType event);
-void update_light_cal_substate(EventType event);
+
+int sensor_calibration_process(void);
+int collect_calibration_data(uint32_t buffer[][2], int array_index);
+int baseline_calibration(uint32_t buffer[][2], int array_index);
+int brightness_calibration(uint32_t buffer[][2]);
+int colour_calibration(uint32_t buffer[][2]);
+int white_calibration(uint32_t buffer[][2]);
 
 #endif /* STATE_MACHINE_H */
