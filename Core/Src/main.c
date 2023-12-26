@@ -110,7 +110,11 @@ uint16_t led_calibration_buffer[NUM_LEDS][3];
 
 uint32_t brightness_calibration_buffer[1 + (NUM_CAL_INCS + 1) + 1][2];
 uint32_t white_calibration_buffer[1 + (NUM_CAL_INCS + 1) + 1][2];
-uint32_t colour_calibration_buffer[1 + (NUM_CAL_INCS + 1) + 1][2];
+uint32_t colour_calibration_buffer[1 + NUM_CAL_INCS + 1][2];
+
+volatile CalibrationFlag pot_calibration_flag = INITIALISE_CALIBRATIONS;
+volatile CalibrationFlag led_calibration_flag = INITIALISE_CALIBRATIONS;
+volatile CalibrationFlag sensor_calibration_flag = INITIALISE_CALIBRATIONS;
 
 /* USER CODE END PV */
 

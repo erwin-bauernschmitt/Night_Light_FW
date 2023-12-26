@@ -16,3 +16,4 @@
 //#define DEBUG_POTS			// ADC potentiometer readings.
 //#define DEBUG_LED_DRIVERS	// LED driver error flags and data.
 //#define DEBUG_LIGHT_SENSOR	// Ambient light sensor readings.
+//#define DEBUG_CALIBRATIONS	// Calibration processes and data.

@@ -79,6 +79,14 @@ typedef enum {
 	RELEASED, PRESSED, NONE, INVALID = -1
 } ButtonState;
 
+typedef enum {
+	INITIALISE_CALIBRATIONS,
+	CALIBRATION_IN_PROGRESS,
+	CALIBRATION_DATA_READY,
+	CALIBRATION_DATA_PROCESSED,
+	CALIBRATION_ABORTED = -1
+} CalibrationFlag;
+
 void update_state(EventType event);
 
 void handle_standby(EventType event);
