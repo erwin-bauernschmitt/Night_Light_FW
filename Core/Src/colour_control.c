@@ -14,29 +14,19 @@ void calculate_pulse_values(uint16_t *pulse_values) {
 		break;
 
 	case WHITE_LIGHT:
-//		pulse_values[0] = (pot1_moving_average * COUNTER_PERIOD / ADC_RES);
-//		pulse_values[1] = (pot1_moving_average * COUNTER_PERIOD / ADC_RES);
-//		pulse_values[2] = (pot1_moving_average * COUNTER_PERIOD / ADC_RES);
 		uint32_t min_kelvin = kelvin_table[0].kelvin;
 		uint32_t max_kelvin = kelvin_table[KELVIN_TABLE_LENGTH - 1].kelvin;
 		uint32_t kelvin_range = max_kelvin - min_kelvin;
 		uint32_t kelvin = min_kelvin
 				+ (uint32_t) ((uint64_t) pot2_moving_average * kelvin_range
 						/ ADC_RES);
-//		uint32_t kelvin = min_kelvin + pot2_moving_average * kelvin_range / ADC_RES;
 		kelvin = (uint16_t) kelvin;
 
 		KelvinToRGB lower;
 		KelvinToRGB higher;
-//		printf("min_kelvin: %u, max_kelvin: %u, kelvin_range: %u, kelvin: %u\n",
-//				min_kelvin, max_kelvin, kelvin_range, kelvin);
 
 		search_rgb_to_kelvin(kelvin, &lower, &higher);
 		pulse_for_kelvin(kelvin, &lower, &higher, pulse_values);
-
-//		pulse_values[0] = pot1_moving_average * pulse_values[0] / ADC_RES;
-//		pulse_values[1] = pot1_moving_average * pulse_values[1] / ADC_RES;
-//		pulse_values[2] = pot1_moving_average * pulse_values[2] / ADC_RES;
 		break;
 
 	case RGB_LIGHT:

@@ -130,13 +130,4 @@ void pulse_for_kelvin(uint32_t kelvin, KelvinToRGB *lower, KelvinToRGB *higher,
 	pulse_values[0] = COUNTER_PERIOD - rgb_values[0] * COUNTER_PERIOD / 256;
 	pulse_values[1] = COUNTER_PERIOD - rgb_values[1] * COUNTER_PERIOD / 256;
 	pulse_values[2] = COUNTER_PERIOD - rgb_values[2] * COUNTER_PERIOD / 256;
-
-	printf("\nLower pulse values: %lu = (%lu, %lu, %lu)\n", lower->kelvin,
-			lower->r, lower->g, lower->b);
-	printf("Higher pulse values: %lu = (%lu, %lu, %lu)\n", higher->kelvin,
-			higher->r, higher->g, higher->b);
-	printf("Interpolated RGB: %lu = (%lu, %lu, %lu)\n", kelvin, rgb_values[0],
-			rgb_values[1], rgb_values[2]);
-	printf("Pulse values: (%u, %u, %u)\n", pulse_values[0], pulse_values[1],
-			pulse_values[2]);
 }
