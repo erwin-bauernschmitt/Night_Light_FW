@@ -80,7 +80,6 @@ State previous_state = WHITE_LIGHT;
 State current_state = STANDBY;
 PotCalibrationSubstate pot_cal_substate = POT_CALIBRATION_START;
 LEDCalibrationSubstate led_cal_substate = LED_CALIBRATION_START;
-LightCalibrationSubstate light_cal_substate = LIGHT_CALIBRATION_START;
 
 volatile EventType event_flag = NO_EVENT;
 
@@ -100,6 +99,22 @@ uint16_t green_lod_flag = 0;
 uint16_t blue_lod_flag = 0;
 
 volatile uint32_t mlux_reading = 0xFFFFFFFF;
+
+volatile SensorFlag light_sensor_flag = WAITING;
+
+uint16_t pot1_calibration_buffer[2];
+uint16_t pot2_calibration_buffer[2];
+uint16_t pot3_calibration_buffer[2];
+
+uint16_t led_calibration_buffer[NUM_LEDS][3];
+
+uint32_t brightness_calibration_buffer[1 + (NUM_CAL_INCS + 1) + 1][2];
+uint32_t white_calibration_buffer[1 + (NUM_CAL_INCS + 1) + 1][2];
+uint32_t colour_calibration_buffer[1 + NUM_CAL_INCS + 1][2];
+
+volatile CalibrationFlag pot_calibration_flag = INITIALISE_CALIBRATIONS;
+volatile CalibrationFlag led_calibration_flag = INITIALISE_CALIBRATIONS;
+volatile CalibrationFlag sensor_calibration_flag = INITIALISE_CALIBRATIONS;
 
 /* USER CODE END PV */
 
@@ -145,7 +160,7 @@ int main(void) {
 
 	/* USER CODE BEGIN SysInit */
 	printf("          \n");
-	printf("Night Light v0.1\n");
+	printf("Night Light v0.2\n");
 	printf("Happy (belated) zeroth birthday, Gabby!\n\n\n\n");
 
 #ifdef DEBUG_INIT
@@ -167,7 +182,9 @@ int main(void) {
 
 	initialise_button_states();
 
-	if (initialise_LED_drivers() != LED_DRIVER_OK) {
+	uint8_t led_init_config[16] = { SET };
+
+	if (initialise_LED_drivers(led_init_config) != LED_DRIVER_OK) {
 #ifdef DEBUG_INIT
 		printf("LED DRIVER INITIALISATION FAILED\n");
 #endif /* DEBUG_INIT */
@@ -207,6 +224,11 @@ int main(void) {
 	printf("\nLED PWM STARTED\n");
 #endif /* DEBUG_INIT */
 
+#ifdef DEBUG_INIT
+	printf("\nINITIALISATION PROCESS COMPLETE\n");
+	printf("ENTERING MAIN WHILE LOOP...\n\n");
+#endif /* DEBUG_INIT */
+
 	/* For testing only: */
 	event_flag = AMBIENT_LIGHT_TURN_ON;		///< Force out of STANDBY state.
 
@@ -214,11 +236,12 @@ int main(void) {
 
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
-#ifdef DEBUG_INIT
-	printf("\nINITIALISATION PROCESS COMPLETE\n");
-	printf("ENTERING MAIN WHILE LOOP...\n\n");
-#endif /* DEBUG_INIT */
+
+	uint16_t pulse_values[3];
+	uint32_t hysteresis_thresholds[2];
+
 	while (1) {
+
 		if (event_flag != NO_EVENT) {
 			update_state(event_flag);
 			event_flag = NO_EVENT;  // Reset the flag after handling the event
@@ -227,12 +250,17 @@ int main(void) {
 		if (potentiometer_flag == NEW_READING_READY) {
 //		  printf("%u    %u    %u\n", pot1_moving_average, pot2_moving_average, pot3_moving_average);
 			/* Set pulse value according to brightness potentiometer. */
-			uint16_t pulse_value = (uint16_t) (pot1_moving_average
-					* COUNTER_PERIOD / ADC_RES);
-			set_pulse_values(pulse_value, pulse_value, pulse_value);
+			calculate_pulse_values(pulse_values);
+			set_pulse_values(pulse_values);
+
+			/* Compute new hysteresis thresholds. */
+			update_hysteresis_thresholds(hysteresis_thresholds);
+
 			/* Reset potentiometer flag. */
 			potentiometer_flag = WAITING_FOR_READING;
 		}
+
+		check_for_on_off(hysteresis_thresholds);
 
 //	  /* To test HAL_GetTick: */
 //	  uint32_t time = HAL_GetTick();

@@ -209,7 +209,8 @@ void determine_led_errors(void) {
 	HAL_GPIO_WritePin(SCLK_GPIO_Port, SCLK_Pin, RESET);
 
 	/* Mask out LOD flags by setting BLANK pins to HIGH. */
-	set_pulse_values(COUNTER_PERIOD, COUNTER_PERIOD, COUNTER_PERIOD);
+	uint16_t off_pulse[3] = { COUNTER_PERIOD, COUNTER_PERIOD, COUNTER_PERIOD };
+	set_pulse_values(off_pulse);
 
 	/* Read TEF flags - inverting the values as XERR is active low. */
 	red_thermal_error_flag = !HAL_GPIO_ReadPin(XERR_R_GPIO_Port, XERR_R_Pin);
@@ -217,7 +218,8 @@ void determine_led_errors(void) {
 	blue_thermal_error_flag = !HAL_GPIO_ReadPin(XERR_B_GPIO_Port, XERR_B_Pin);
 
 	/* Unmask the LOD flags by setting BLANK pins to LOW. */
-	set_pulse_values(0, 0, 0);
+	uint16_t on_pulse[3] = { 0, 0, 0 };
+	set_pulse_values(on_pulse);
 
 	/* Latch the LOD data into the internal registers. */
 	HAL_GPIO_WritePin(XLAT_GPIO_Port, XLAT_Pin, SET);
@@ -259,6 +261,8 @@ void determine_led_errors(void) {
  * @return None.
  */
 ReadStatus read_light_sensor_data(void) {
+	/* Set status flag to signal that a read is in progress. */
+	light_sensor_flag = IN_PROGRESS;
 	HAL_StatusTypeDef result;
 	uint8_t opt4001_addr = 0x44 << 1;
 
@@ -278,6 +282,7 @@ ReadStatus read_light_sensor_data(void) {
 #ifdef DEBUG_LIGHT_SENSOR
 		printf("Failed to read OPT4001 Register 0.\n");
 #endif /* DEBUG_LIGHT_SENSOR */
+		light_sensor_flag = WAITING;
 		return READ_FAILED;
 	}
 
@@ -298,6 +303,7 @@ ReadStatus read_light_sensor_data(void) {
 #ifdef DEBUG_LIGHT_SENSOR
 		printf("Failed to read OPT4001 Register 1.\n");
 #endif /* DEBUG_LIGHT_SENSOR */
+		light_sensor_flag = WAITING;
 		return READ_FAILED;
 	}
 
@@ -311,7 +317,7 @@ ReadStatus read_light_sensor_data(void) {
 #ifdef DEBUG_LIGHT_SENSOR
 	printf("%lu mlux\n", mlux_reading);
 #endif /* DEBUG_LIGHT_SENSOR */
-
+	light_sensor_flag = NEW_READY;
 	return READ_SUCCESSFUL;
 }
 

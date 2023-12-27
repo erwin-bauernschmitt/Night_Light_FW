@@ -8,10 +8,10 @@
  *******************************************************************************
  */
 
-
 #ifndef STATE_MACHINE_H
 #define STATE_MACHINE_H
 
+#include "stdint.h"
 
 /**
  * @brief States the night light can be in.
@@ -22,9 +22,7 @@ typedef enum {
 	RGB_LIGHT,					///< Light on (RGB light spectrum).
 	POT_CALIBRATION,			///< Potentiometer calibration mode.
 	LED_CALIBRATION,			///< LED dot correction calibration mode.
-	AMBIENT_LIGHT_CALIBRATION	///< Ambient light sensor calibration mode.
 } State;
-
 
 /**
  * @brief Substates of the potentiometer calibration mode.
@@ -38,7 +36,6 @@ typedef enum {
 	POT_3_LOWER,				///< Capture ADC value of Pot 3 lower limit.
 	POT_3_UPPER,				///< Capture ADC value of Pot 3 upper limit.
 } PotCalibrationSubstate;
-
 
 /**
  * @brief Substates of the LED dot corretion calibration mode.
@@ -63,17 +60,6 @@ typedef enum {
 	LED_16,						///< Tune LED 16 colour channels and save.
 } LEDCalibrationSubstate;
 
-
-/**
- * @brief Substates of the ambient light sensor calibration mode.
- */
-typedef enum {
-	LIGHT_CALIBRATION_START,	///< Start of ambient light calibration process.
-	LIT_ROOM,					///< Capture ambient effect of LEDs (lit room).
-	DARK_ROOM,					///< Capture ambient effect of LEDs (dark room).
-} LightCalibrationSubstate;
-
-
 /**
  * @brief Types of events that could trigger a state change.
  */
@@ -89,14 +75,17 @@ typedef enum {
 	NO_EVENT = -1				///< No event.
 } EventType;
 
-
 typedef enum {
-	RELEASED,
-	PRESSED,
-	NONE,
-	INVALID = -1
+	RELEASED, PRESSED, NONE, INVALID = -1
 } ButtonState;
 
+typedef enum {
+	INITIALISE_CALIBRATIONS,
+	CALIBRATION_IN_PROGRESS,
+	CALIBRATION_DATA_READY,
+	CALIBRATION_DATA_PROCESSED,
+	CALIBRATION_ABORTED = -1
+} CalibrationFlag;
 
 void update_state(EventType event);
 
@@ -105,7 +94,12 @@ void handle_white_light(EventType event);
 void handle_RGB_light(EventType event);
 void update_pot_cal_substate(EventType event);
 void update_led_cal_substate(EventType event);
-void update_light_cal_substate(EventType event);
 
+int sensor_calibration_process(void);
+int collect_calibration_data(uint32_t buffer[][2], int array_index);
+int baseline_calibration(uint32_t buffer[][2], int array_index);
+int brightness_calibration(uint32_t buffer[][2]);
+int colour_calibration(uint32_t buffer[][2]);
+int white_calibration(uint32_t buffer[][2]);
 
 #endif /* STATE_MACHINE_H */

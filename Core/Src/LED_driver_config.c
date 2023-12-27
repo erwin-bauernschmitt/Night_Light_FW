@@ -8,7 +8,6 @@
  *******************************************************************************
  */
 
-
 #include "stm32f3xx_hal.h"
 #include <stdint.h>
 #include <stdio.h>
@@ -17,13 +16,12 @@
 #include "LED_driver_config.h"
 #include "debug_flags.h"
 
-
 /**
  * @brief Configures the drivers to turn on all 16 RGB LEDs.
  *
  * @return The status of the LED drivers.
  */
-LED_Driver_Status initialise_LED_drivers(void) {
+LED_Driver_Status initialise_LED_drivers(uint8_t *led_init_config) {
 #ifdef DEBUG_INIT
 	printf("\nINITIALISING LED DRIVERS\n");
 	printf("Bit-banging...\n");
@@ -33,14 +31,16 @@ LED_Driver_Status initialise_LED_drivers(void) {
 	HAL_GPIO_WritePin(XLAT_GPIO_Port, XLAT_Pin, RESET);
 	HAL_GPIO_WritePin(SCLK_GPIO_Port, SCLK_Pin, RESET);
 
-	/* Turn all three channels of all 16 LEDs ON. */
-	HAL_GPIO_WritePin(SIN_R_GPIO_Port, SIN_R_Pin, SET);
-	HAL_GPIO_WritePin(SIN_G_GPIO_Port, SIN_G_Pin, SET);
-	HAL_GPIO_WritePin(SIN_B_GPIO_Port, SIN_B_Pin, SET);
-
-	/* Clock 16 ones into the configuration registers. */
 	int i;
-	for (i = 0; i < 16; i++) {
+	for (i = 1; i <= 16; i++) {
+		/* Turn the LED on/off according to the config array. */
+		HAL_GPIO_WritePin(SIN_R_GPIO_Port, SIN_R_Pin,
+				led_init_config[NUM_LEDS - i]);
+		HAL_GPIO_WritePin(SIN_G_GPIO_Port, SIN_G_Pin,
+				led_init_config[NUM_LEDS - i]);
+		HAL_GPIO_WritePin(SIN_B_GPIO_Port, SIN_B_Pin,
+				led_init_config[NUM_LEDS - i]);
+		/* Clock the configuration into the LED drivers. */
 		HAL_GPIO_WritePin(SCLK_GPIO_Port, SCLK_Pin, SET);
 		HAL_GPIO_WritePin(SCLK_GPIO_Port, SCLK_Pin, RESET);
 	}
@@ -51,5 +51,4 @@ LED_Driver_Status initialise_LED_drivers(void) {
 
 	return LED_DRIVER_OK;
 }
-
 

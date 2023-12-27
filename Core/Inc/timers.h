@@ -8,13 +8,10 @@
  *******************************************************************************
  */
 
-
 #ifndef TIMERS_H
 #define TIMERS_H
 
-
 #include "stm32f3xx_hal.h"
-
 
 /**
  * @brief Flags for processing the pot readings.
@@ -25,8 +22,6 @@ typedef enum {
 	WAITING_FOR_READING		///< Used after processing the new moving average.
 } PotFlag;
 
-
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim);
-
 
 #endif /* TIMERS_G */
