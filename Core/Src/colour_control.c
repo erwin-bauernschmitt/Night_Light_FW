@@ -9,9 +9,6 @@
 void calculate_pulse_values(uint16_t *pulse_values) {
 	switch (current_state) {
 	case STANDBY:
-		pulse_values[0] = COUNTER_PERIOD;
-		pulse_values[1] = COUNTER_PERIOD;
-		pulse_values[2] = COUNTER_PERIOD;
 		break;
 
 	case WHITE_LIGHT:
