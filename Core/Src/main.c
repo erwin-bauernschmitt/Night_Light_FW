@@ -237,9 +237,8 @@ int main(void) {
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
 
-	uint16_t pulse_values[3] =
-			{ COUNTER_PERIOD, COUNTER_PERIOD, COUNTER_PERIOD };
-	set_pulse_values(pulse_values);
+	uint16_t pulse_values[3];
+	uint32_t hysteresis_thresholds[2];
 
 	while (1) {
 
@@ -253,9 +252,15 @@ int main(void) {
 			/* Set pulse value according to brightness potentiometer. */
 			calculate_pulse_values(pulse_values);
 			set_pulse_values(pulse_values);
+
+			/* Compute new hysteresis thresholds. */
+			update_hysteresis_thresholds(hysteresis_thresholds);
+
 			/* Reset potentiometer flag. */
 			potentiometer_flag = WAITING_FOR_READING;
 		}
+
+		check_for_on_off(hysteresis_thresholds);
 
 //	  /* To test HAL_GetTick: */
 //	  uint32_t time = HAL_GetTick();

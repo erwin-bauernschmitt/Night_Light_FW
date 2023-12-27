@@ -74,6 +74,12 @@ void update_state(EventType event) {
 void handle_standby(EventType event) {
 	switch (event) {
 	case AMBIENT_LIGHT_TURN_ON:
+		/* Turn the LEDs back on. */
+		uint8_t led_init_config[16];
+		for (int i = 0; i < 16; i++) {
+			led_init_config[i] = SET;
+		}
+		initialise_LED_drivers(led_init_config);
 		previous_state = STANDBY;
 		current_state = colour_mode;
 #ifdef DEBUG_STATE_MACHINE
@@ -159,6 +165,9 @@ void handle_white_light(EventType event) {
 		break;
 
 	case AMBIENT_LIGHT_TURN_OFF:
+		/* Turn the LEDs completely off. */
+		uint8_t led_init_config[16] = { RESET };
+		initialise_LED_drivers(led_init_config);
 		previous_state = WHITE_LIGHT;
 		current_state = STANDBY;
 #ifdef DEBUG_STATE_MACHINE
@@ -218,6 +227,9 @@ void handle_RGB_light(EventType event) {
 		break;
 
 	case AMBIENT_LIGHT_TURN_OFF:
+		/* Turn the LEDs completely off. */
+		uint8_t led_init_config[16] = { RESET };
+		initialise_LED_drivers(led_init_config);
 		previous_state = RGB_LIGHT;
 		current_state = STANDBY;
 #ifdef DEBUG_STATE_MACHINE

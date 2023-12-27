@@ -9,9 +9,6 @@
 void calculate_pulse_values(uint16_t *pulse_values) {
 	switch (current_state) {
 	case STANDBY:
-		pulse_values[0] = COUNTER_PERIOD;
-		pulse_values[1] = COUNTER_PERIOD;
-		pulse_values[2] = COUNTER_PERIOD;
 		break;
 
 	case WHITE_LIGHT:
@@ -31,9 +28,15 @@ void calculate_pulse_values(uint16_t *pulse_values) {
 		pulse_for_kelvin(kelvin, &lower, &higher, pulse_values);
 
 		/* Adjust the RGB pulse vector for brightness */
-		pulse_values[0] = pulse_values[0] + (uint16_t)((uint32_t)pot1_moving_average * (COUNTER_PERIOD - pulse_values[0]) / ADC_RES);
-		pulse_values[1] = pulse_values[1] + (uint16_t)((uint32_t)pot1_moving_average * (COUNTER_PERIOD - pulse_values[1]) / ADC_RES);
-		pulse_values[2] = pulse_values[2] + (uint16_t)((uint32_t)pot1_moving_average * (COUNTER_PERIOD - pulse_values[2]) / ADC_RES);
+		pulse_values[0] = pulse_values[0]
+				+ (uint16_t) ((uint32_t) pot1_moving_average
+						* (COUNTER_PERIOD - pulse_values[0]) / ADC_RES);
+		pulse_values[1] = pulse_values[1]
+				+ (uint16_t) ((uint32_t) pot1_moving_average
+						* (COUNTER_PERIOD - pulse_values[1]) / ADC_RES);
+		pulse_values[2] = pulse_values[2]
+				+ (uint16_t) ((uint32_t) pot1_moving_average
+						* (COUNTER_PERIOD - pulse_values[2]) / ADC_RES);
 		break;
 
 	case RGB_LIGHT:
@@ -93,9 +96,15 @@ void calculate_pulse_values(uint16_t *pulse_values) {
 		pulse_values[2] = COUNTER_PERIOD - pulse_values[2];
 
 		/* Adjust the RGB pulse vector for brightness */
-		pulse_values[0] = pulse_values[0] + (uint16_t)((uint32_t)pot1_moving_average * (COUNTER_PERIOD - pulse_values[0]) / ADC_RES);
-		pulse_values[1] = pulse_values[1] + (uint16_t)((uint32_t)pot1_moving_average * (COUNTER_PERIOD - pulse_values[1]) / ADC_RES);
-		pulse_values[2] = pulse_values[2] + (uint16_t)((uint32_t)pot1_moving_average * (COUNTER_PERIOD - pulse_values[2]) / ADC_RES);
+		pulse_values[0] = pulse_values[0]
+				+ (uint16_t) ((uint32_t) pot1_moving_average
+						* (COUNTER_PERIOD - pulse_values[0]) / ADC_RES);
+		pulse_values[1] = pulse_values[1]
+				+ (uint16_t) ((uint32_t) pot1_moving_average
+						* (COUNTER_PERIOD - pulse_values[1]) / ADC_RES);
+		pulse_values[2] = pulse_values[2]
+				+ (uint16_t) ((uint32_t) pot1_moving_average
+						* (COUNTER_PERIOD - pulse_values[2]) / ADC_RES);
 		break;
 
 	case POT_CALIBRATION:
